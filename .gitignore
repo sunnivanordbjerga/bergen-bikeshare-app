@@ -1,0 +1,27 @@
+# JetBrains IDE
+.idea/
+*.iml
+
+# Default ignored files
+/shelf/
+
+# Editor-based HTTP Client requests
+/httpRequests/
+
+# Database query files
+/queries/
+
+# Python
+__pycache__/
+*.pyc
+
+# Virtual environments
+.venv/
+venv/
+
+# SQLite databases
+*.db
+
+# OS files
+.DS_Store
+Thumbs.db
