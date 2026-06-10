@@ -5,7 +5,8 @@ Database connection utilities for the Bergen BikeShare application.
 import sqlite3
 from pathlib import Path
 
-DB_PATH = Path("data") / "bikeshare.db"
+PROJECT_ROOT = Path(__file__).resolve().parents[2]
+DB_PATH = PROJECT_ROOT / "data" / "bikeshare.db"
 
 
 def get_connection() -> sqlite3.Connection:
