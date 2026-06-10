@@ -1,5 +1,5 @@
 """
-Database connection utilities for the Bergen Bysykkel application.
+Database connection utilities for the Bergen BikeShare application.
 """
 
 import sqlite3
