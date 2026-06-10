@@ -30,6 +30,8 @@ COMPLAINT_TYPES = [
 
 
 def seed_reference_data() -> None:
+    """Populate look-up tables."""
+
     with get_connection() as conn:
         conn.executemany(
             "INSERT OR IGNORE INTO ActivityStatus (Description) VALUES (?);",
@@ -37,17 +39,22 @@ def seed_reference_data() -> None:
         )
 
         conn.executemany(
-            "INSERT OR IGNORE INTO SubscriptionType (Description, Price, DurationInDays) VALUES (?,?,?);",
+            """
+            INSERT OR IGNORE INTO SubscriptionType
+                (Description, Price, DurationInDays)
+            VALUES (?, ?, ?);
+            """,
             SUBSCRIPTION_TYPES,
         )
 
         conn.executemany(
             "INSERT OR IGNORE INTO ComplaintType (Description) VALUES (?);",
-            [(c_type,) for c_type in COMPLAINT_TYPES],
+            [(complaint_type,) for complaint_type in COMPLAINT_TYPES],
         )
 
 
 if __name__ == "__main__":
     seed_reference_data()
-    # import legacy dataset
-    # generate faker data for more users, complaints and trips
+
+    # TODO: import legacy dataset
+    # TODO: generate faker data for more users, complaints and trips
