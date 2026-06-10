@@ -103,6 +103,10 @@ CREATE TABLE Trip
     EndStationID   INTEGER,
     StartTime      TEXT    NOT NULL, -- save as YYYY-MM-DD HH:MM:SS
     EndTime        TEXT,             -- NULL while trip is active
+    CHECK (
+        EndTime IS NULL
+        OR StartTime <= EndTime
+        ),
     FOREIGN KEY (UserID)
         REFERENCES User (UserID),
     FOREIGN KEY (BikeID)
@@ -114,7 +118,7 @@ CREATE TABLE Trip
 );
 
 
---Indexes
+-- Indexes
 
 CREATE INDEX IF NOT EXISTS idx_bike_status
     ON Bike (ActivityStatusID);
