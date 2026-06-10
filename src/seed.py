@@ -20,17 +20,17 @@ SUBSCRIPTION_TYPES = [
 
 COMPLAINT_TYPES = [
     'Flat Tire',
-    'Chain issues',
-    'Gear issues',
-    'Dysfunctional brake',
+    'Chain Issue',
+    'Gear Issue',
+    'Brake Issue',
     'Damaged Frame',
-    'Damaged/Missing Pedal',
-    'Damaged/Missing Saddle',
-    'Damaged/Missing Handlebars',
-    'Damaged/Missing Bell',
-    'Damaged/Missing Lock',
-    'Damaged/Missing Light',
-    'Damaged/Missing Helmet'
+    'Damaged or Missing Pedal',
+    'Damaged or Missing Saddle',
+    'Damaged or Missing Handlebar',
+    'Damaged or Missing Bell',
+    'Damaged or Missing Lock',
+    'Damaged or Missing Light',
+    'Damaged or Missing Helmet'
 ]
 
 
