@@ -1,7 +1,7 @@
 -- Bergen BikeShare database schema.
 -- SQLite 3.
 
-CREATE TABLE Station
+CREATE TABLE IF NOT EXISTS Station
 (
     StationID   INTEGER PRIMARY KEY,
     StationName TEXT    NOT NULL UNIQUE,
@@ -14,14 +14,14 @@ CREATE TABLE Station
 );
 
 
-CREATE TABLE ActivityStatus
+CREATE TABLE IF NOT EXISTS ActivityStatus
 (
     ActivityStatusID INTEGER PRIMARY KEY,
     Description      TEXT NOT NULL UNIQUE
 );
 
 
-CREATE TABLE Bike
+CREATE TABLE IF NOT EXISTS Bike
 (
     BikeID           INTEGER PRIMARY KEY,
     BikeName         TEXT    NOT NULL UNIQUE,
@@ -34,7 +34,7 @@ CREATE TABLE Bike
 );
 
 
-CREATE TABLE User
+CREATE TABLE IF NOT EXISTS User
 (
     UserID    INTEGER PRIMARY KEY,
     FirstName TEXT NOT NULL,
@@ -47,7 +47,7 @@ CREATE TABLE User
 );
 
 
-CREATE TABLE SubscriptionType
+CREATE TABLE IF NOT EXISTS SubscriptionType
 (
     SubscriptionTypeID INTEGER PRIMARY KEY,
     Description        TEXT    NOT NULL UNIQUE,
@@ -58,7 +58,7 @@ CREATE TABLE SubscriptionType
 );
 
 
-CREATE TABLE Subscription
+CREATE TABLE IF NOT EXISTS Subscription
 (
     SubscriptionID     INTEGER PRIMARY KEY,
     UserID             INTEGER NOT NULL,
@@ -71,14 +71,14 @@ CREATE TABLE Subscription
 );
 
 
-CREATE TABLE ComplaintType
+CREATE TABLE IF NOT EXISTS ComplaintType
 (
     ComplaintTypeID INTEGER PRIMARY KEY,
     Description     TEXT NOT NULL UNIQUE
 );
 
 
-CREATE TABLE Complaint
+CREATE TABLE IF NOT EXISTS Complaint
 (
     ComplaintID     INTEGER PRIMARY KEY,
     BikeID          INTEGER NOT NULL,
@@ -94,7 +94,7 @@ CREATE TABLE Complaint
 );
 
 
-CREATE TABLE Trip
+CREATE TABLE IF NOT EXISTS Trip
 (
     TripID         INTEGER PRIMARY KEY,
     UserID         INTEGER NOT NULL,
