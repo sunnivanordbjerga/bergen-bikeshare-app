@@ -26,7 +26,7 @@ CREATE TABLE IF NOT EXISTS Bike
     BikeID           INTEGER PRIMARY KEY,
     BikeName         TEXT    NOT NULL UNIQUE,
     LastStationID    INTEGER,                    -- NULL when bike is active, missing or in service
-    ActivityStatusID INTEGER NOT NULL DEFAULT 4, -- New bikes are registered in Service until inspected
+    ActivityStatusID INTEGER NOT NULL,
     FOREIGN KEY (LastStationID)
         REFERENCES Station (StationID),
     FOREIGN KEY (ActivityStatusID)
