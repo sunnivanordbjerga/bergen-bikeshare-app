@@ -51,7 +51,18 @@ def valid_trip_row():
     }
 
 
-def test_valid_station(valid_station_row):
-    parsed = _parse_station(valid_station_row, "start_station")
+class TestParseStation:
+    def test_valid_station(self, valid_station_row):
+        parsed = _parse_station(valid_station_row, "start_station")
 
-    assert parsed == ("1", "Høyteknologisenteret", "60.382216", "5.332288", "66")
+        assert parsed == ("1", "Høyteknologisenteret", "60.382216", "5.332288", "66")
+
+    def test_missing_station_id(self, valid_station_row):
+        valid_station_row["start_station_id"] = ""
+
+        assert _parse_station(valid_station_row, "start_station_id") is None
+
+    def test_missing_station_name(self, valid_station_row):
+        valid_station_row["start_station_name"] = "  "
+
+        assert _parse_station(valid_station_row, "start_station_name") is None
