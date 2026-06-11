@@ -45,7 +45,7 @@ def _load_subscription_types(conn: sqlite3.Connection) -> dict[str, int]:
 
 def _parse_station(row: dict, prefix: str) -> tuple | None:
     station_id = row.get(f"{prefix}_id")
-    station_name = row.get(f"{prefix}_name")
+    station_name = row.get(f"{prefix}_name", "").strip()
     latitude = row.get(f"{prefix}_latitude")
     longitude = row.get(f"{prefix}_longitude")
     max_capacity = row.get(f"{prefix}_max_spots")
@@ -64,8 +64,8 @@ def _parse_station(row: dict, prefix: str) -> tuple | None:
 
 def _parse_user(row: dict) -> tuple | None:
     user_id = row.get("user_id")
-    user_name = row.get("user_name")
-    phone_number = row.get("user_phone_number")
+    user_name = row.get("user_name", "").strip()
+    phone_number = row.get("user_phone_number", "").strip()
 
     if not all([user_id, user_name, phone_number]):
         return None
@@ -79,25 +79,35 @@ def _parse_user(row: dict) -> tuple | None:
 
 def _parse_bike(row: dict, activity_statuses: dict[str, int]) -> tuple | None:
     bike_id = row.get("bike_id")
-    bike_name = row.get("bike_name")
-    activity_status = activity_statuses.get(row.get("bike_status"))
+    bike_name = row.get("bike_name", "").strip()
+    activity_status = row.get("bike_status", "").strip()
 
-    if not bike_id or not bike_name or activity_status is None:
+    if not activity_status:
         return None
 
-    return bike_id, bike_name, row["bike_station_id"], activity_status
+    activity_status_id = activity_statuses.get(activity_status)
+
+    if not bike_id or not bike_name or activity_status_id is None:
+        return None
+
+    return bike_id, bike_name, row["bike_station_id"] or None, activity_status_id
 
 
 def _parse_subscription(row: dict, sub_types: dict[str, int]) -> tuple | None:
     sub_id = row.get("subscription_id")
     user_id = row.get("user_id")
     start_date = row.get("subscription_start_time")
-    sub_type = sub_types.get(row.get("subscription_type"))
+    sub_type = row.get("subscription_type", "").strip()
 
-    if not all([sub_id, user_id, start_date]) or sub_type is None:
+    if not sub_type:
         return None
 
-    return sub_id, user_id, start_date, sub_type
+    sub_type_id = sub_types.get(sub_type)
+
+    if not all([sub_id, user_id, start_date]) or sub_type_id is None:
+        return None
+
+    return sub_id, user_id, start_date, sub_type_id
 
 
 def _parse_trip(row: dict) -> tuple | None:
@@ -128,11 +138,11 @@ def _extract_data(csv_path: Path) -> ParsedData:
         subscription_types = _load_subscription_types(conn)
 
     station_data: list[tuple] = []
-    seen_stations: set[int] = set()
+    seen_stations: set[str] = set()
     bike_data: list[tuple] = []
-    seen_bikes: set[int] = set()
+    seen_bikes: set[str] = set()
     user_data: list[tuple] = []
-    seen_users: set[int] = set()
+    seen_users: set[str] = set()
     sub_data: list[tuple] = []
     trip_data: list[tuple] = []
 
