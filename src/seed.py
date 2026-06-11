@@ -29,8 +29,8 @@ COMPLAINT_TYPES = [
 ]
 
 
-def seed_reference_data() -> None:
-    """Populate look-up tables."""
+def _seed_reference_data() -> None:
+    """Populates the look-up tables."""
 
     with get_connection() as conn:
         conn.executemany(
@@ -54,7 +54,7 @@ def seed_reference_data() -> None:
 
 
 if __name__ == "__main__":
-    seed_reference_data()
+    _seed_reference_data()
+    import_legacy_csv_dataset(CSV_PATH)
 
-    # TODO: import legacy dataset
     # TODO: generate faker data for more users, complaints and trips
