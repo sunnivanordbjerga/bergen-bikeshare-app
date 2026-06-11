@@ -1,5 +1,6 @@
 [project]
 name = "bergen_bikeshare_app"
+version = "0.1.0"
 dependencies = [
     "pytest == 9.0.3",
     "pytest-cov == 7.1.0",
@@ -7,9 +8,9 @@ dependencies = [
     "shiny == 1.6.3",
     "faker == 40.23.0"
 ]
-requires-pyton = ">= 3.13"
+requires-python = ">= 3.13"
 authors = [{ name = "Sunniva Nord Bjerga", email = "sunnivanordbjerga@gmail.com" }]
-maintainer = [{ name = "Sunniva Nord Bjerga", email = "sunnivanordbjerga@gmail.com" }]
+maintainers = [{ name = "Sunniva Nord Bjerga", email = "sunnivanordbjerga@gmail.com" }]
 description = "Administrator dashboard for a fictional bikeshare company."
 readme = "README.md"
 license = "MIT"
