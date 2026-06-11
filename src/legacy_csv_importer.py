@@ -30,14 +30,13 @@ def _parse_station(row: dict, prefix: str) -> tuple | None:
         row[f"{prefix}_latitude"],
         row[f"{prefix}_longitude"],
         row[f"{prefix}_max_spots"],
-        row[f"{prefix}_available_spots"],
     )
 
 
 def _parse_user(row: dict) -> tuple | None:
     user_id = row.get("user_id")
     user_name = row.get("user_name")
-    phone_number = row.get("phone_number")
+    phone_number = row.get("user_phone_number")
 
     if not user_id or not user_name or not phone_number:
         return None
