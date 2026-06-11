@@ -38,7 +38,7 @@ def _parse_user(row: dict) -> tuple | None:
     user_id = row.get("user_id")
     user_name = row.get("user_name")
     phone_number = row.get("phone_number")
-    
+
     if not user_id or not user_name or not phone_number:
         return None
 
@@ -46,18 +46,11 @@ def _parse_user(row: dict) -> tuple | None:
     fname = name[0]
     lname = name[1] if len(name) > 1 else ""
 
-    return (
-        user_id,
-        fname,
-        lname,
-        phone_number,
-        None,
-        None
-    )
+    return user_id, fname, lname, phone_number, None, None
 
 
 def _parse_bike(row: dict) -> tuple | None:
-    #TODO: Parse bikes, lookup activityStatus
+    # TODO: Parse bikes, lookup activityStatus
     pass
 
 
@@ -127,10 +120,10 @@ def _insert_data(data: ParsedData) -> None:
 
         cur.executemany(
             """
-        INSERT OR IGNORE INTO User
-                        (UserID, FirstName, LastName, PhoneNr, Latitude, Longitude)
-                        VALUES (?,?,?,?,?,?);
-                        """,
+            INSERT OR IGNORE INTO User
+                (UserID, FirstName, LastName, PhoneNr, Latitude, Longitude)
+            VALUES (?, ?, ?, ?, ?, ?);
+            """,
             data.users,
         )
 
@@ -143,7 +136,7 @@ def _insert_data(data: ParsedData) -> None:
             data.bikes,
         )
 
-        #TODO: Subs and trips
+        # TODO: Subs and trips
 
 
 def import_legacy_csv_dataset(csv_path: Path) -> None:
