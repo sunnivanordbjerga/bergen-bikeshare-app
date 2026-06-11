@@ -1,8 +1,9 @@
 """
-Parses and imports csv data from bysykkel.csv to the database.
+Parses and imports CSV data from bysykkel.csv into the SQLite database.
 """
 
 import csv
+import sqlite3
 from pathlib import Path
 from dataclasses import dataclass
 
@@ -11,11 +12,35 @@ from database.connection import get_connection
 
 @dataclass
 class ParsedData:
+    """Normalised records extracted from the legacy CSV dataset."""
+
     stations: list[tuple]
     users: list[tuple]
     bikes: list[tuple]
     subscriptions: list[tuple]
     trips: list[tuple]
+
+
+def _load_activity_statuses(conn: sqlite3.Connection) -> dict[str, int]:
+    rows = conn.execute(
+        """
+        SELECT ActivityStatusID, Description
+        FROM ActivityStatus;
+        """
+    ).fetchall()
+
+    return {description: activity_id for activity_id, description in rows}
+
+
+def _load_subscription_types(conn: sqlite3.Connection) -> dict[str, int]:
+    rows = conn.execute(
+        """
+        SELECT SubscriptionTypeID, Description
+        FROM SubscriptionType;
+        """
+    ).fetchall()
+
+    return {description: sub_id for sub_id, description in rows}
 
 
 def _parse_station(row: dict, prefix: str) -> tuple | None:
@@ -48,26 +73,39 @@ def _parse_user(row: dict) -> tuple | None:
     return user_id, fname, lname, phone_number, None, None
 
 
-def _parse_bike(row: dict) -> tuple | None:
+def _parse_bike(row: dict, activity_statuses: dict) -> tuple | None:
     # TODO: Parse bikes, lookup activityStatus
     pass
 
 
-def _parse_subscription(row: dict) -> tuple | None:
-    pass
+def _parse_subscription(row: dict, sub_types: dict) -> tuple | None:
+    sub_id = row.get("subscription_id")
+    user_id = row.get("user_id")
+    start_date = row.get("subscription_start_time")
+    sub_type = sub_types.get(row.get("subscription_type"))
+
+    if not all([sub_id, user_id, start_date, sub_type]):
+        return None
+
+    return sub_id, user_id, start_date, sub_type
 
 
-def _parse_trip(row: dict) -> tuple | None:
+def _parse_trip(row: dict) -> tuple | None:  # TODO: Parse trips using FKs
     pass
 
 
 def _extract_data(csv_path: Path) -> ParsedData:
+    """Extracts normalized records from a legacy CSV dataset."""
+    with get_connection() as conn:
+        activity_statuses = _load_activity_statuses(conn)
+        subscription_types = _load_subscription_types(conn)
+
     station_data = []
     seen_stations = set()
     bike_data = []
-    seen_bike = set()
+    seen_bikes = set()
     user_data = []
-    seen_user = set()
+    seen_users = set()
     sub_data = []
     trip_data = []
 
@@ -82,16 +120,18 @@ def _extract_data(csv_path: Path) -> ParsedData:
                     station_data.append(station)
 
             user = _parse_user(row)
-            if user and user[0] not in seen_user:
-                seen_user.add(user[0])
+            if user and user[0] not in seen_users:
+                seen_users.add(user[0])
                 user_data.append(user)
 
-            bike = _parse_bike(row)
-            if bike and bike[0] not in seen_bike:
-                seen_bike.add(bike[0])
+            bike = _parse_bike(row, activity_statuses)
+            if bike and bike[0] not in seen_bikes:
+                seen_bikes.add(bike[0])
                 bike_data.append(bike)
 
-            subscription = _parse_subscription(row)
+            subscription = _parse_subscription(row, subscription_types)
+            if subscription:
+                sub_data.append(subscription)
 
             trip = _parse_trip(row)
 
@@ -105,15 +145,16 @@ def _extract_data(csv_path: Path) -> ParsedData:
 
 
 def _insert_data(data: ParsedData) -> None:
+    """Insert extracted data from the legacy CSV file into the database."""
     with get_connection() as conn:
         cur = conn.cursor()
 
         cur.executemany(
             """
-        INSERT OR IGNORE INTO Station
-            (StationID, StationName, Latitude, Longitude, MaxCapacity) 
-        VALUES (?,?,?,?,?);
-                        """,
+            INSERT OR IGNORE INTO Station
+                (StationID, StationName, Latitude, Longitude, MaxCapacity)
+            VALUES (?, ?, ?, ?, ?);
+            """,
             data.stations,
         )
 
@@ -128,16 +169,38 @@ def _insert_data(data: ParsedData) -> None:
 
         cur.executemany(
             """
-        INSERT OR IGNORE INTO Bike
-            (BikeID, BikeName, LastStationID, ActivityStatusID) 
-        VALUES (?,?,?,?);
-        """,
+            INSERT OR IGNORE INTO Bike
+                (BikeID, BikeName, LastStationID, ActivityStatusID)
+            VALUES (?, ?, ?, ?);
+            """,
             data.bikes,
         )
 
-        # TODO: Subs and trips
+        cur.executemany(
+            """
+            INSERT OR IGNORE INTO Subscription
+                (SubscriptionID, UserID, StartDate, SubscriptionTypeID)
+            VALUES (?, ?, ?, ?);
+            """,
+            data.subscriptions,
+        )
+
+        cur.executemany(
+            """
+            INSERT OR IGNORE INTO Trip
+                (TripID, UserID, BikeID, StartStationID, EndStationID, StartTime, EndTime)
+            VALUES (?,?,?,?,?,?,?); 
+            """,
+            data.trips,
+        )
 
 
 def import_legacy_csv_dataset(csv_path: Path) -> None:
+    """
+    Import a legacy CSV dataset into the database.
+
+    Args:
+        csv_path: Path to the CSV file to import.
+    """
     data = _extract_data(csv_path)
     _insert_data(data)
