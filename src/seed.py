@@ -2,7 +2,10 @@
 Populates the Bergen BikeShare database.
 """
 
-from database.connection import get_connection
+from legacy_csv_importer import import_legacy_csv_dataset
+from database.connection import get_connection, PROJECT_ROOT
+
+CSV_PATH = PROJECT_ROOT / "data" / "bysykkel.csv"
 
 ACTIVITY_STATUSES = ["Parked", "Active", "Missing", "Service"]
 

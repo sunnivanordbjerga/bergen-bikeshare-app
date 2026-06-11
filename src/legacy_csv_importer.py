@@ -12,7 +12,7 @@ from database.connection import get_connection
 
 @dataclass
 class ParsedData:
-    """Normalised records extracted from the legacy CSV dataset."""
+    """Normalized records extracted from the legacy CSV dataset."""
 
     stations: list[tuple]
     users: list[tuple]
@@ -45,16 +45,20 @@ def _load_subscription_types(conn: sqlite3.Connection) -> dict[str, int]:
 
 def _parse_station(row: dict, prefix: str) -> tuple | None:
     station_id = row.get(f"{prefix}_id")
+    station_name = row.get(f"{prefix}_name")
+    latitude = row.get(f"{prefix}_latitude")
+    longitude = row.get(f"{prefix}_longitude")
+    max_capacity = row.get(f"{prefix}_max_spots")
 
-    if not station_id:
+    if not all([station_id, station_name, latitude, longitude, max_capacity]):
         return None
 
     return (
         station_id,
-        row[f"{prefix}_name"],
-        row[f"{prefix}_latitude"],
-        row[f"{prefix}_longitude"],
-        row[f"{prefix}_max_spots"],
+        station_name,
+        latitude,
+        longitude,
+        max_capacity,
     )
 
 
@@ -63,7 +67,7 @@ def _parse_user(row: dict) -> tuple | None:
     user_name = row.get("user_name")
     phone_number = row.get("user_phone_number")
 
-    if not user_id or not user_name or not phone_number:
+    if not all([user_id, user_name, phone_number]):
         return None
 
     name = user_name.split(" ", maxsplit=1)
@@ -73,25 +77,48 @@ def _parse_user(row: dict) -> tuple | None:
     return user_id, fname, lname, phone_number, None, None
 
 
-def _parse_bike(row: dict, activity_statuses: dict) -> tuple | None:
-    # TODO: Parse bikes, lookup activityStatus
-    pass
+def _parse_bike(row: dict, activity_statuses: dict[str, int]) -> tuple | None:
+    bike_id = row.get("bike_id")
+    bike_name = row.get("bike_name")
+    activity_status = activity_statuses.get(row.get("bike_status"))
+
+    if not bike_id or not bike_name or activity_status is None:
+        return None
+
+    return bike_id, bike_name, row["bike_station_id"], activity_status
 
 
-def _parse_subscription(row: dict, sub_types: dict) -> tuple | None:
+def _parse_subscription(row: dict, sub_types: dict[str, int]) -> tuple | None:
     sub_id = row.get("subscription_id")
     user_id = row.get("user_id")
     start_date = row.get("subscription_start_time")
     sub_type = sub_types.get(row.get("subscription_type"))
 
-    if not all([sub_id, user_id, start_date, sub_type]):
+    if not all([sub_id, user_id, start_date]) or sub_type is None:
         return None
 
     return sub_id, user_id, start_date, sub_type
 
 
-def _parse_trip(row: dict) -> tuple | None:  # TODO: Parse trips using FKs
-    pass
+def _parse_trip(row: dict) -> tuple | None:
+    trip_id = row.get("trip_id")
+    user_id = row.get("user_id")
+    bike_id = row.get("bike_id")
+    start_station = row.get("start_station_id")
+    start_time = row.get("trip_start_time")
+
+    if not all([trip_id, user_id, bike_id, start_station, start_time]):
+        return None
+
+    return (
+        trip_id,
+        user_id,
+        bike_id,
+        start_station,
+        row["end_station_id"] or None,
+        start_time,
+        row["trip_end_time"] or None,
+    )
 
 
 def _extract_data(csv_path: Path) -> ParsedData:
@@ -100,14 +127,14 @@ def _extract_data(csv_path: Path) -> ParsedData:
         activity_statuses = _load_activity_statuses(conn)
         subscription_types = _load_subscription_types(conn)
 
-    station_data = []
-    seen_stations = set()
-    bike_data = []
-    seen_bikes = set()
-    user_data = []
-    seen_users = set()
-    sub_data = []
-    trip_data = []
+    station_data: list[tuple] = []
+    seen_stations: set[int] = set()
+    bike_data: list[tuple] = []
+    seen_bikes: set[int] = set()
+    user_data: list[tuple] = []
+    seen_users: set[int] = set()
+    sub_data: list[tuple] = []
+    trip_data: list[tuple] = []
 
     with csv_path.open(newline="", encoding="utf-8") as csvfile:
         reader = csv.DictReader(csvfile)
@@ -134,6 +161,8 @@ def _extract_data(csv_path: Path) -> ParsedData:
                 sub_data.append(subscription)
 
             trip = _parse_trip(row)
+            if trip:
+                trip_data.append(trip)
 
     return ParsedData(
         stations=station_data,
