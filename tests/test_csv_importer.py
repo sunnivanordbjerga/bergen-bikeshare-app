@@ -1,5 +1,20 @@
 import pytest
-from legacy_csv_importer import _parse_station, _parse_user, _parse_bike, _parse_subscription
+from legacy_csv_importer import (
+    _parse_station,
+    _parse_user,
+    _parse_bike,
+    _parse_subscription,
+    _parse_trip,
+)
+
+ACTIVITY_STATUSES: dict[str, int] = {
+    "Parked": 1,
+    "Active": 2,
+    "Missing": 3,
+    "Service": 4,
+}
+
+SUB_TYPES: dict[str, int] = {"Day": 1, "Week": 2, "Month": 3, "Year": 4}
 
 
 @pytest.fixture
@@ -113,63 +128,91 @@ class TestParseUser:
 
 
 class TestParseBike:
-    activity_statuses = {"Parked": 1, "Active": 2, "Missing": 3, "Service": 4}
-
     def test_valid_bike_returns_correct_values(self, valid_bike_row):
-        parsed = _parse_bike(valid_bike_row, self.activity_statuses)
+        parsed = _parse_bike(valid_bike_row, ACTIVITY_STATUSES)
 
         assert parsed == ("1", "Thea", None, 2)
 
     def test_missing_bike_id_returns_none(self, valid_bike_row):
         valid_bike_row["bike_id"] = ""
 
-        assert _parse_bike(valid_bike_row, self.activity_statuses) is None
+        assert _parse_bike(valid_bike_row, ACTIVITY_STATUSES) is None
 
     def test_missing_bike_name_returns_none(self, valid_bike_row):
         valid_bike_row["bike_name"] = "  "
 
-        assert _parse_bike(valid_bike_row, self.activity_statuses) is None
+        assert _parse_bike(valid_bike_row, ACTIVITY_STATUSES) is None
 
     def test_missing_bike_status_returns_none(self, valid_bike_row):
         valid_bike_row["bike_status"] = "  "
 
-        assert _parse_bike(valid_bike_row, self.activity_statuses) is None
+        assert _parse_bike(valid_bike_row, ACTIVITY_STATUSES) is None
 
     def test_invalid_bike_status_returns_none(self, valid_bike_row):
         valid_bike_row["bike_status"] = "Flying"
 
-        assert _parse_bike(valid_bike_row, self.activity_statuses) is None
+        assert _parse_bike(valid_bike_row, ACTIVITY_STATUSES) is None
 
 
 class TestParseSubscription:
-    sub_types = {"Day": 1, "Week": 2, "Month": 3, "Year": 4}
-
     def test_valid_subscription_returns_correct_values(self, valid_subscription_row):
-        parsed = _parse_subscription(valid_subscription_row, self.sub_types)
+        parsed = _parse_subscription(valid_subscription_row, SUB_TYPES)
 
         assert parsed == ("1", "1", "2020-09-18 17:22:27", 1)
 
     def test_missing_subscription_id_returns_none(self, valid_subscription_row):
         valid_subscription_row["subscription_id"] = ""
 
-        assert _parse_subscription(valid_subscription_row, self.sub_types) is None
+        assert _parse_subscription(valid_subscription_row, SUB_TYPES) is None
 
     def test_missing_subscription_user_id_returns_none(self, valid_subscription_row):
         valid_subscription_row["user_id"] = ""
 
-        assert _parse_subscription(valid_subscription_row, self.sub_types) is None
+        assert _parse_subscription(valid_subscription_row, SUB_TYPES) is None
 
     def test_missing_subscription_date_returns_none(self, valid_subscription_row):
         valid_subscription_row["subscription_start_time"] = ""
 
-        assert _parse_subscription(valid_subscription_row, self.sub_types) is None
+        assert _parse_subscription(valid_subscription_row, SUB_TYPES) is None
 
     def test_missing_subscription_type_returns_none(self, valid_subscription_row):
         valid_subscription_row["subscription_type"] = " "
 
-        assert _parse_subscription(valid_subscription_row, self.sub_types) is None
+        assert _parse_subscription(valid_subscription_row, SUB_TYPES) is None
 
     def test_invalid_subscription_type_returns_none(self, valid_subscription_row):
         valid_subscription_row["subscription_type"] = "Minute"
 
-        assert _parse_subscription(valid_subscription_row, self.sub_types) is None
+        assert _parse_subscription(valid_subscription_row, SUB_TYPES) is None
+
+
+class TestParseTrip:
+    def test_valid_trip_returns_correct_values(self, valid_trip_row):
+        parsed = _parse_trip(valid_trip_row)
+
+        assert parsed == ("1", "1", "1", "1", None, "2020-09-18 17:22:27", None)
+
+    def test_missing_trip_id_returns_none(self, valid_trip_row):
+        valid_trip_row["trip_id"] = ""
+
+        assert _parse_trip(valid_trip_row) is None
+
+    def test_missing_trip_user_id_returns_none(self, valid_trip_row):
+        valid_trip_row["user_id"] = ""
+
+        assert _parse_trip(valid_trip_row) is None
+
+    def test_missing_trip_bike_id_returns_none(self, valid_trip_row):
+        valid_trip_row["bike_id"] = ""
+
+        assert _parse_trip(valid_trip_row) is None
+
+    def test_missing_trip_start_station_returns_none(self, valid_trip_row):
+        valid_trip_row["start_station_id"] = ""
+
+        assert _parse_trip(valid_trip_row) is None
+
+    def test_missing_trip_start_time_returns_none(self, valid_trip_row):
+        valid_trip_row["trip_start_time"] = ""
+
+        assert _parse_trip(valid_trip_row) is None
