@@ -1,5 +1,5 @@
 import pytest
-from legacy_csv_importer import _parse_station, _parse_user, _parse_bike
+from legacy_csv_importer import _parse_station, _parse_user, _parse_bike, _parse_subscription
 
 
 @pytest.fixture
@@ -136,6 +136,40 @@ class TestParseBike:
         assert _parse_bike(valid_bike_row, self.activity_statuses) is None
 
     def test_invalid_bike_status_returns_none(self, valid_bike_row):
-        valid_bike_row["bike_status"] = "Hour"
+        valid_bike_row["bike_status"] = "Flying"
 
         assert _parse_bike(valid_bike_row, self.activity_statuses) is None
+
+
+class TestParseSubscription:
+    sub_types = {"Day": 1, "Week": 2, "Month": 3, "Year": 4}
+
+    def test_valid_subscription_returns_correct_values(self, valid_subscription_row):
+        parsed = _parse_subscription(valid_subscription_row, self.sub_types)
+
+        assert parsed == ("1", "1", "2020-09-18 17:22:27", 1)
+
+    def test_missing_subscription_id_returns_none(self, valid_subscription_row):
+        valid_subscription_row["subscription_id"] = ""
+
+        assert _parse_subscription(valid_subscription_row, self.sub_types) is None
+
+    def test_missing_subscription_user_id_returns_none(self, valid_subscription_row):
+        valid_subscription_row["user_id"] = ""
+
+        assert _parse_subscription(valid_subscription_row, self.sub_types) is None
+
+    def test_missing_subscription_date_returns_none(self, valid_subscription_row):
+        valid_subscription_row["subscription_start_time"] = ""
+
+        assert _parse_subscription(valid_subscription_row, self.sub_types) is None
+
+    def test_missing_subscription_type_returns_none(self, valid_subscription_row):
+        valid_subscription_row["subscription_type"] = " "
+
+        assert _parse_subscription(valid_subscription_row, self.sub_types) is None
+
+    def test_invalid_subscription_type_returns_none(self, valid_subscription_row):
+        valid_subscription_row["subscription_type"] = "Minute"
+
+        assert _parse_subscription(valid_subscription_row, self.sub_types) is None
