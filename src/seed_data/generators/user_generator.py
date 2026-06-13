@@ -1,9 +1,16 @@
 """Generates fake users."""
 
+from random import uniform
 from dataclasses import dataclass
 from faker import Faker
 
-fake = Faker("nb_NO")
+fake = Faker("no_NO")
+
+BERGEN_MIN_LAT = 60.1017
+BERGEN_MAX_LAT = 60.6167
+
+BERGEN_MIN_LON = 5.0833
+BERGEN_MAX_LON = 5.8533
 
 
 @dataclass
@@ -31,8 +38,8 @@ def generate_users(num_users: int) -> list[GeneratedUser]:
             first_name=fake.first_name(),
             last_name=fake.last_name(),
             phone_number=fake.phone_number(),
-            latitude=float(fake.latitude()),
-            longitude=float(fake.longitude()),
+            latitude=round(uniform(BERGEN_MIN_LAT, BERGEN_MAX_LAT), 6),
+            longitude=round(uniform(BERGEN_MIN_LON, BERGEN_MAX_LON), 6),
         )
         for _ in range(num_users)
     ]
