@@ -1,5 +1,5 @@
 import pytest
-from legacy_csv_importer import _parse_station
+from legacy_csv_importer import _parse_station, _parse_user
 
 
 @pytest.fixture
@@ -15,7 +15,7 @@ def valid_station_row():
 
 @pytest.fixture
 def valid_user_row():
-    return {"user_id": "1", "user_name": "Jane Doe", "user_phone_number": "12345789"}
+    return {"user_id": "1", "user_name": "Jane Doe", "user_phone_number": "12345678"}
 
 
 @pytest.fixture
@@ -52,17 +52,46 @@ def valid_trip_row():
 
 
 class TestParseStation:
-    def test_valid_station(self, valid_station_row):
+    def test_valid_station_returns_correct_values(self, valid_station_row):
         parsed = _parse_station(valid_station_row, "start_station")
 
         assert parsed == ("1", "Høyteknologisenteret", "60.382216", "5.332288", "66")
 
-    def test_missing_station_id(self, valid_station_row):
+    def test_missing_station_id_returns_none(self, valid_station_row):
         valid_station_row["start_station_id"] = ""
 
-        assert _parse_station(valid_station_row, "start_station_id") is None
+        assert _parse_station(valid_station_row, "start_station") is None
 
-    def test_missing_station_name(self, valid_station_row):
+    def test_missing_station_name_returns_none(self, valid_station_row):
         valid_station_row["start_station_name"] = "  "
 
-        assert _parse_station(valid_station_row, "start_station_name") is None
+        assert _parse_station(valid_station_row, "start_station") is None
+
+
+class TestParseUser:
+    def test_valid_user_returns_correct_values(self, valid_user_row):
+        parsed = _parse_user(valid_user_row)
+
+        assert parsed == ("1", "Jane", "Doe", "12345678", None, None)
+
+    def test_missing_user_id_returns_none(self, valid_user_row):
+        valid_user_row["user_id"] = ""
+
+        assert _parse_user(valid_user_row) is None
+
+    def test_blank_name_returns_none(self, valid_user_row):
+        valid_user_row["user_name"] = "  "
+
+        assert _parse_user(valid_user_row) is None
+
+    def test_single_name_returns_empty_last_name(self, valid_user_row):
+        valid_user_row["user_name"] = "Jane"
+
+        parsed = _parse_user(valid_user_row)
+        
+        assert parsed == ("1", "Jane", "", "12345678", None, None)
+
+    def test_missing_phone_number_returns_none(self, valid_user_row):
+        valid_user_row["user_phone_number"] = "  "
+
+        assert _parse_user(valid_user_row) is None
