@@ -2,8 +2,9 @@
 Populates the Bergen BikeShare database.
 """
 
-from legacy_csv_importer import import_legacy_csv_dataset
 from database.connection import get_connection, PROJECT_ROOT
+from legacy_csv_importer import import_legacy_csv_dataset
+from seed_data.generators.user_generator import generate_users, GeneratedUser
 
 CSV_PATH = PROJECT_ROOT / "data" / "bysykkel.csv"
 
@@ -56,8 +57,33 @@ def _seed_reference_data() -> None:
         )
 
 
+def _seed_user_data(users: list[GeneratedUser]) -> None:
+    """Populates the user table."""
+    with get_connection() as conn:
+        conn.executemany(
+            """
+            INSERT OR IGNORE INTO User(FirstName, LastName, PhoneNr, Latitude, Longitude) 
+                VALUES (?, ?, ?, ?, ?);
+            """,
+            [
+                (
+                    user.first_name,
+                    user.last_name,
+                    user.phone_number,
+                    user.latitude,
+                    user.longitude,
+                )
+                for user in users
+            ],
+        )
+
+
 if __name__ == "__main__":
     _seed_reference_data()
+
     import_legacy_csv_dataset(CSV_PATH)
 
-    # TODO: generate faker data for more users, complaints and trips
+    users = generate_users(50)
+    _seed_user_data(users)
+
+    # TODO: generate faker data for more complaints and trips
