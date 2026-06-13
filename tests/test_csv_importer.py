@@ -67,6 +67,20 @@ class TestParseStation:
 
         assert _parse_station(valid_station_row, "start_station") is None
 
+    def test_missing_latitude_returns_none(self, valid_station_row):
+        valid_station_row["start_station_latitude"] = ""
+
+        assert _parse_station(valid_station_row, "start_station") is None
+
+    def test_missing_longitude_returns_none(self, valid_station_row):
+        valid_station_row["start_station_longitude"] = ""
+
+        assert _parse_station(valid_station_row, "start_station") is None
+
+    def test_missing_max_capacity_returns_none(self, valid_station_row):
+        valid_station_row["start_station_max_spots"] = ""
+
+        assert _parse_station(valid_station_row, "start_station") is None
 
 class TestParseUser:
     def test_valid_user_returns_correct_values(self, valid_user_row):
