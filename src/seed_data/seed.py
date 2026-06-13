@@ -1,10 +1,15 @@
 """
 Populates the Bergen BikeShare database.
+TODO: Consider moving queries to repository layer once implemented
 """
 
 from database.connection import get_connection, PROJECT_ROOT
 from legacy_csv_importer import import_legacy_csv_dataset
 from seed_data.generators.user_generator import generate_users, GeneratedUser
+from seed_data.generators.complaint_generator import (
+    generate_complaints,
+    GeneratedComplaint,
+)
 
 CSV_PATH = PROJECT_ROOT / "data" / "bysykkel.csv"
 
@@ -33,9 +38,27 @@ COMPLAINT_TYPES = [
 ]
 
 
+def _load_ids() -> tuple[list[int], list[int], list[int]]:
+    """Loads existing bike, user and complaint IDs."""
+    with get_connection() as conn:
+        bike_ids = [
+            row[0] for row in conn.execute("SELECT BikeID FROM Bike").fetchall()
+        ]
+        user_ids = [
+            row[0] for row in conn.execute("SELECT UserID FROM User").fetchall()
+        ]
+        complaint_type_ids = [
+            row[0]
+            for row in conn.execute(
+                "SELECT ComplaintTypeID FROM ComplaintType"
+            ).fetchall()
+        ]
+
+        return bike_ids, user_ids, complaint_type_ids
+
+
 def _seed_reference_data() -> None:
     """Populates the look-up tables."""
-
     with get_connection() as conn:
         conn.executemany(
             "INSERT OR IGNORE INTO ActivityStatus (Description) VALUES (?);",
@@ -78,7 +101,28 @@ def _seed_user_data(users: list[GeneratedUser]) -> None:
         )
 
 
-if __name__ == "__main__":
+def _seed_complaint_data(complaints: list[GeneratedComplaint]) -> None:
+    """Populates the complaint table."""
+    with get_connection() as conn:
+        conn.executemany(
+            """
+            INSERT OR IGNORE INTO Complaint (BikeID, UserID, ComplaintTypeID, ReportDate)
+            VALUES (?, ?, ?, ?);
+            """,
+            [
+                (
+                    complaint.bike_id,
+                    complaint.user_id,
+                    complaint.complaint_type_id,
+                    complaint.report_date,
+                )
+                for complaint in complaints
+            ],
+        )
+
+
+def _seed_database() -> None:
+    """Populates the database with legacy, reference and generated data."""
     _seed_reference_data()
 
     import_legacy_csv_dataset(CSV_PATH)
@@ -86,4 +130,13 @@ if __name__ == "__main__":
     users = generate_users(50)
     _seed_user_data(users)
 
-    # TODO: generate faker data for more complaints and trips
+    bike_ids, user_ids, complaint_type_ids = _load_ids()
+
+    complaints = generate_complaints(30, bike_ids, user_ids, complaint_type_ids)
+    _seed_complaint_data(complaints)
+
+    # TODO: generate faker data for more bikes, trips and subs + add some stations
+
+
+if __name__ == "__main__":
+    _seed_database()
