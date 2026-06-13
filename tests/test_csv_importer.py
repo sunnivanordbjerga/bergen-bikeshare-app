@@ -1,5 +1,5 @@
 import pytest
-from legacy_csv_importer import _parse_station, _parse_user
+from legacy_csv_importer import _parse_station, _parse_user, _parse_bike
 
 
 @pytest.fixture
@@ -82,6 +82,7 @@ class TestParseStation:
 
         assert _parse_station(valid_station_row, "start_station") is None
 
+
 class TestParseUser:
     def test_valid_user_returns_correct_values(self, valid_user_row):
         parsed = _parse_user(valid_user_row)
@@ -102,10 +103,39 @@ class TestParseUser:
         valid_user_row["user_name"] = "Jane"
 
         parsed = _parse_user(valid_user_row)
-        
+
         assert parsed == ("1", "Jane", "", "12345678", None, None)
 
     def test_missing_phone_number_returns_none(self, valid_user_row):
         valid_user_row["user_phone_number"] = "  "
 
         assert _parse_user(valid_user_row) is None
+
+
+class TestParseBike:
+    activity_statuses = {"Parked": 1, "Active": 2, "Missing": 3, "Service": 4}
+
+    def test_valid_bike_returns_correct_values(self, valid_bike_row):
+        parsed = _parse_bike(valid_bike_row, self.activity_statuses)
+
+        assert parsed == ("1", "Thea", None, 2)
+
+    def test_missing_bike_id_returns_none(self, valid_bike_row):
+        valid_bike_row["bike_id"] = ""
+
+        assert _parse_bike(valid_bike_row, self.activity_statuses) is None
+
+    def test_missing_bike_name_returns_none(self, valid_bike_row):
+        valid_bike_row["bike_name"] = "  "
+
+        assert _parse_bike(valid_bike_row, self.activity_statuses) is None
+
+    def test_missing_bike_status_returns_none(self, valid_bike_row):
+        valid_bike_row["bike_status"] = "  "
+
+        assert _parse_bike(valid_bike_row, self.activity_statuses) is None
+
+    def test_invalid_bike_status_returns_none(self, valid_bike_row):
+        valid_bike_row["bike_status"] = "Hour"
+
+        assert _parse_bike(valid_bike_row, self.activity_statuses) is None
