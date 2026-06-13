@@ -7,14 +7,14 @@ from seed_data.legacy_csv_importer import (
     _parse_trip,
 )
 
-ACTIVITY_STATUSES: dict[str, int] = {
+ACTIVITY_STATUSES = {
     "Parked": 1,
     "Active": 2,
     "Missing": 3,
     "Service": 4,
 }
 
-SUB_TYPES: dict[str, int] = {"Day": 1, "Week": 2, "Month": 3, "Year": 4}
+SUB_TYPES = {"Day": 1, "Week": 2, "Month": 3, "Year": 4}
 
 
 @pytest.fixture
