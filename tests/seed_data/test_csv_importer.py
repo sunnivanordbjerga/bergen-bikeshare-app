@@ -1,5 +1,5 @@
 import pytest
-from legacy_csv_importer import (
+from seed_data.legacy_csv_importer import (
     _parse_station,
     _parse_user,
     _parse_bike,
