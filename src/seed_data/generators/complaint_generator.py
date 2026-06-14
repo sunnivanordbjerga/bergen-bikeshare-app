@@ -26,9 +26,9 @@ def generate_complaints(
 
     Args:
         num_complaints: Number of complaints to generate.
-        bike_ids: List of existing bike ids.
-        user_ids: List of existing user ids.
-        complaint_type_ids: List of existing complaint type ids.
+        bike_ids: List of existing bike IDs.
+        user_ids: List of existing user IDs.
+        complaint_type_ids: List of existing complaint type IDs.
 
     Returns:
         A list of generated complaints.
