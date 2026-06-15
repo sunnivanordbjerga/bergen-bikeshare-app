@@ -6,6 +6,10 @@ TODO: Consider moving queries to repository layer once implemented
 from database.connection import get_connection, PROJECT_ROOT
 from legacy_csv_importer import import_legacy_csv_dataset
 from seed_data.generators.bike_generator import GeneratedBike, generate_bikes
+from seed_data.generators.subscription_generator import (
+    GeneratedSubscription,
+    generate_subscriptions,
+)
 from seed_data.generators.trip_generator import GeneratedTrip, generate_trips
 from seed_data.generators.user_generator import generate_users, GeneratedUser
 from seed_data.generators.complaint_generator import (
@@ -53,7 +57,7 @@ COMPLAINT_TYPES = [
 ]
 
 
-def _load_reference_ids() -> tuple(list[int], list[int], list[int]):
+def _load_reference_ids() -> tuple[list[int], list[int], list[int], list[int]]:
     """Loads existing station, activity status and complaint type IDs."""
     with get_connection() as conn:
         station_ids = [
@@ -71,8 +75,14 @@ def _load_reference_ids() -> tuple(list[int], list[int], list[int]):
                 "SELECT ComplaintTypeID FROM ComplaintType"
             ).fetchall()
         ]
+        sub_type_ids = [
+            row[0]
+            for row in conn.execute(
+                "SELECT SubscriptionTypeID FROM SubscriptionType"
+            ).fetchall()
+        ]
 
-        return station_ids, activity_status_ids, complaint_type_ids
+        return station_ids, activity_status_ids, complaint_type_ids, sub_type_ids
 
 
 def _load_dynamic_ids() -> tuple[list[int], list[int]]:
@@ -137,26 +147,6 @@ def _seed_user_data(users: list[GeneratedUser]) -> None:
         )
 
 
-def _seed_complaint_data(complaints: list[GeneratedComplaint]) -> None:
-    """Populates the complaint table."""
-    with get_connection() as conn:
-        conn.executemany(
-            """
-            INSERT OR IGNORE INTO Complaint (BikeID, UserID, ComplaintTypeID, ReportDate)
-            VALUES (?, ?, ?, ?);
-            """,
-            [
-                (
-                    complaint.bike_id,
-                    complaint.user_id,
-                    complaint.complaint_type_id,
-                    complaint.report_date,
-                )
-                for complaint in complaints
-            ],
-        )
-
-
 def _seed_bike_data(bikes: list[GeneratedBike]) -> None:
     """Populates the bike table."""
     with get_connection() as conn:
@@ -198,11 +188,52 @@ def _seed_trip_data(trips: list[GeneratedTrip]) -> None:
         )
 
 
+def _seed_complaint_data(complaints: list[GeneratedComplaint]) -> None:
+    """Populates the complaint table."""
+    with get_connection() as conn:
+        conn.executemany(
+            """
+            INSERT OR IGNORE INTO Complaint (BikeID, UserID, ComplaintTypeID, ReportDate)
+            VALUES (?, ?, ?, ?);
+            """,
+            [
+                (
+                    complaint.bike_id,
+                    complaint.user_id,
+                    complaint.complaint_type_id,
+                    complaint.report_date,
+                )
+                for complaint in complaints
+            ],
+        )
+
+
+def _seed_subscription_data(subscriptions: list[GeneratedSubscription]) -> None:
+    """Populates the subscription table."""
+    with get_connection() as conn:
+        conn.executemany(
+            """
+            INSERT OR IGNORE INTO Subscription (UserID, StartDate, SubscriptionTypeID)
+                VALUES (?, ?, ?);
+            """,
+            [
+                (
+                    subscription.user_id,
+                    subscription.start_date,
+                    subscription.sub_type_id,
+                )
+                for subscription in subscriptions
+            ],
+        )
+
+
 def _seed_database() -> None:
     """Populates the database with legacy, reference and generated data."""
     _seed_reference_data()
 
-    station_ids, activity_status_ids, complaint_type_ids = _load_reference_ids()
+    station_ids, activity_status_ids, complaint_type_ids, sub_type_ids = (
+        _load_reference_ids()
+    )
 
     import_legacy_csv_dataset(CSV_PATH)
 
@@ -217,10 +248,11 @@ def _seed_database() -> None:
     trips = generate_trips(1, user_ids, bike_ids, station_ids)
     _seed_trip_data(trips)
 
-    complaints = generate_complaints(1, bike_ids, user_ids, complaint_type_ids)
+    complaints = generate_complaints(1, user_ids, bike_ids, complaint_type_ids)
     _seed_complaint_data(complaints)
 
-    # TODO: generate faker data for more trips and subs
+    subscriptions = generate_subscriptions(1, user_ids, sub_type_ids)
+    _seed_subscription_data(subscriptions)
 
 
 if __name__ == "__main__":
