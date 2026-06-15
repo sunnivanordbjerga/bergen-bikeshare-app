@@ -5,11 +5,11 @@ from random import random, choice, randint
 from dataclasses import dataclass
 from faker import Faker
 
-fake = Faker("no_NO")
-
 ACTIVE_TRIP_PROBABILITY: float = 0.03
 SAME_STATION_PROBABILITY: float = 0.02
 SHORT_TRIP_PROBABILITY: float = 0.8
+
+fake = Faker("no_NO")
 
 
 @dataclass

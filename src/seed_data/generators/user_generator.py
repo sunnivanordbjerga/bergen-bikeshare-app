@@ -12,7 +12,7 @@ BERGEN_MIN_LON = 5.0833
 BERGEN_MAX_LON = 5.8533
 
 INTERNATIONAL_USER_PERCENTAGE = 0.15
-INTERNATIONAL_LOCALES = ["en_US", "de_DE", "pl_PL", "uk_UA"]
+INTERNATIONAL_LOCALES = ["sv_SE", "da_DK", "en_US", "de_DE", "pl_PL"]
 
 fake_no = Faker("no_NO")
 fake_inter = Faker(INTERNATIONAL_LOCALES)
