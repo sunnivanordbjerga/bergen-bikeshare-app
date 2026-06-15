@@ -5,7 +5,7 @@ from random import random, choice, randint
 from dataclasses import dataclass
 from faker import Faker
 
-ACTIVE_TRIP_PROBABILITY: float = 0.03
+ACTIVE_TRIP_PROBABILITY: float = 0.005
 SAME_STATION_PROBABILITY: float = 0.02
 SHORT_TRIP_PROBABILITY: float = 0.8
 
@@ -40,7 +40,7 @@ def _generate_trip(
     active_trip: bool = random() < ACTIVE_TRIP_PROBABILITY
 
     trip_started = fake.date_time_between(
-        start_date="-24H" if active_trip else "-6M", end_date="now"
+        start_date="-24h" if active_trip else "-6M", end_date="now"
     )
 
     trip_duration = (
