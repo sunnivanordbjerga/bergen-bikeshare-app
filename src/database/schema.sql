@@ -25,7 +25,7 @@ CREATE TABLE IF NOT EXISTS Bike
 (
     BikeID           INTEGER PRIMARY KEY,
     BikeName         TEXT    NOT NULL UNIQUE,
-    LastStationID    INTEGER,                    -- NULL when bike is active, missing or in service
+    LastStationID    INTEGER NOT NULL, -- Last known station of the bike
     ActivityStatusID INTEGER NOT NULL,
     FOREIGN KEY (LastStationID)
         REFERENCES Station (StationID),
@@ -105,7 +105,7 @@ CREATE TABLE IF NOT EXISTS Trip
     EndTime        TEXT,             -- NULL while trip is active
     CHECK (
         EndTime IS NULL
-        OR StartTime <= EndTime
+            OR StartTime <= EndTime
         ),
     FOREIGN KEY (UserID)
         REFERENCES User (UserID),
