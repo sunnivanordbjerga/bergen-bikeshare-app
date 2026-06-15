@@ -98,14 +98,9 @@ def _load_dynamic_ids() -> tuple[list[int], list[int]]:
         return bike_ids, user_ids
 
 
-def _seed_reference_data() -> None:
+def _seed_lookup_data() -> None:
     """Populates the look-up tables."""
     with get_connection() as conn:
-        conn.executemany(
-            "INSERT OR IGNORE INTO Station(StationName, Latitude, Longitude, MaxCapacity) VALUES (?,?,?,?);",
-            ADDITIONAL_STATIONS,
-        )
-
         conn.executemany(
             "INSERT OR IGNORE INTO ActivityStatus (Description) VALUES (?);",
             [(status,) for status in ACTIVITY_STATUSES],
@@ -123,6 +118,14 @@ def _seed_reference_data() -> None:
         conn.executemany(
             "INSERT OR IGNORE INTO ComplaintType (Description) VALUES (?);",
             [(complaint_type,) for complaint_type in COMPLAINT_TYPES],
+        )
+
+
+def _seed_additional_stations():
+    with get_connection() as conn:
+        conn.executemany(
+            "INSERT OR IGNORE INTO Station(StationName, Latitude, Longitude, MaxCapacity) VALUES (?,?,?,?);",
+            ADDITIONAL_STATIONS,
         )
 
 
@@ -229,13 +232,15 @@ def _seed_subscription_data(subscriptions: list[GeneratedSubscription]) -> None:
 
 def seed_database() -> None:
     """Populates the database with legacy, reference and generated data."""
-    _seed_reference_data()
+    _seed_lookup_data()
+
+    import_legacy_csv_dataset(CSV_PATH)
+
+    _seed_additional_stations()
 
     station_ids, activity_status_ids, complaint_type_ids, sub_type_ids = (
         _load_reference_ids()
     )
-
-    import_legacy_csv_dataset(CSV_PATH)
 
     users = generate_users(200)
     _seed_user_data(users)
