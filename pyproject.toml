@@ -2,9 +2,9 @@
 name = "bergen_bikeshare_app"
 version = "0.1.0"
 dependencies = [
-    "pytest == 9.0.3",
+    "pytest == 9.1.0",
     "pytest-cov == 7.1.0",
-    "ruff == 0.15.16",
+    "ruff == 0.15.17",
     "shiny == 1.6.3",
     "faker == 40.23.0"
 ]
