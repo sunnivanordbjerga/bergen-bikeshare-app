@@ -37,6 +37,9 @@ def generate_users(num_users: int) -> list[GeneratedUser]:
     Returns:
         A list of generated users.
     """
+    if num_users < 0:
+        raise ValueError("num_users cannot be negative.")
+
     users = []
 
     for _ in range(num_users):

@@ -85,5 +85,7 @@ def generate_trips(
     Returns:
         A list of generated trips.
     """
+    if num_trips < 0:
+        raise ValueError("num_trips cannot be negative.")
 
     return [_generate_trip(user_ids, bike_ids, station_ids) for _ in range(num_trips)]

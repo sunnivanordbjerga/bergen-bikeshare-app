@@ -33,6 +33,8 @@ def generate_complaints(
     Returns:
         A list of generated complaints.
     """
+    if num_complaints < 0:
+        raise ValueError("num_complaints cannot be negative.")
 
     return [
         GeneratedComplaint(

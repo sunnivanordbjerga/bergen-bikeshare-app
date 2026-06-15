@@ -32,6 +32,8 @@ def generate_subscriptions(
     Returns:
         A list of generated subscriptions.
     """
+    if num_subs < 0:
+        raise ValueError("num_subs cannot be negative.")
 
     return [
         GeneratedSubscription(

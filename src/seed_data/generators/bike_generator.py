@@ -30,10 +30,12 @@ def generate_bikes(
     Returns:
         A list of generated bikes.
     """
+    if num_bikes < 0:
+        raise ValueError("num_bikes cannot be negative.")
 
     return [
         GeneratedBike(
-            bike_name=fake.first_name(),
+            bike_name=fake.unique.first_name(),
             last_station_id=choice(station_ids),
             activity_status_id=choices(
                 activity_status_ids, ACTIVITY_STATUS_WEIGHTS, k=1
