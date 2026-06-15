@@ -1,8 +1,10 @@
 """Generates fake bikes."""
 
-from random import choice
+from random import choice, choices
 from dataclasses import dataclass
 from faker import Faker
+
+ACTIVITY_STATUS_WEIGHTS = [70, 20, 8, 2]
 
 fake = Faker("no_NO")
 
@@ -33,7 +35,9 @@ def generate_bikes(
         GeneratedBike(
             bike_name=fake.first_name(),
             last_station_id=choice(station_ids),
-            activity_status_id=choice(activity_status_ids),
+            activity_status_id=choices(
+                activity_status_ids, ACTIVITY_STATUS_WEIGHTS, k=1
+            )[0],
         )
         for _ in range(num_bikes)
     ]
