@@ -4,7 +4,7 @@ TODO: Consider moving queries to repository layer once implemented
 """
 
 from database.connection import get_connection, PROJECT_ROOT
-from legacy_csv_importer import import_legacy_csv_dataset
+from seed_data.legacy_csv_importer import import_legacy_csv_dataset
 from seed_data.generators.bike_generator import GeneratedBike, generate_bikes
 from seed_data.generators.subscription_generator import (
     GeneratedSubscription,
@@ -237,21 +237,21 @@ def _seed_database() -> None:
 
     import_legacy_csv_dataset(CSV_PATH)
 
-    users = generate_users(1)
+    users = generate_users(200)
     _seed_user_data(users)
 
-    bikes = generate_bikes(1, station_ids, activity_status_ids)
+    bikes = generate_bikes(80, station_ids, activity_status_ids)
     _seed_bike_data(bikes)
 
     bike_ids, user_ids = _load_dynamic_ids()
 
-    trips = generate_trips(1, user_ids, bike_ids, station_ids)
+    trips = generate_trips(4000, user_ids, bike_ids, station_ids)
     _seed_trip_data(trips)
 
-    complaints = generate_complaints(1, user_ids, bike_ids, complaint_type_ids)
+    complaints = generate_complaints(100, user_ids, bike_ids, complaint_type_ids)
     _seed_complaint_data(complaints)
 
-    subscriptions = generate_subscriptions(1, user_ids, sub_type_ids)
+    subscriptions = generate_subscriptions(300, user_ids, sub_type_ids)
     _seed_subscription_data(subscriptions)
 
 
