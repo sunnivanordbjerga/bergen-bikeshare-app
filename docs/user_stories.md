@@ -1,4 +1,9 @@
-# Repair Technician
+# User stories
+
+*NOTE: The roles "Repair Technician" and "Administrator" represent responsibilities and intended workflows.
+The application does not implement authentication or role-based access control.*
+
+## Repair Technician
 
 **As a repair technician,**
 **I want to see which bikes have registered complaints,**
@@ -33,7 +38,7 @@
 - [ ] The bike status changes from `Service` to `Parked`
 - [ ] Returned bikes appear as available
 
-# Administrator
+## Administrator
 
 **As an administrator,**
 **I want to register new bikes,**
@@ -48,17 +53,17 @@
 - [ ] The system prevents duplicate bike names
 - [ ] The newly registered bike appears in the bike overview
 
-
 **As an administrator,**
 **I want to view and filter bikes,**
 **so I can monitor bike availability and maintenance status.**
 
 **Acceptance Criteria:**
+
 - [ ] The system displays all bikes
 - [ ] The administrator can filter bikes by station
 - [ ] The administrator can filter bikes by activity status
 - [ ] Selecting a bike displays additional bike information
- 
+
 **As an administrator,**
 **I want to view station information and statistics,**
 **so I can monitor station performance and usage.**
