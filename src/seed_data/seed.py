@@ -227,7 +227,7 @@ def _seed_subscription_data(subscriptions: list[GeneratedSubscription]) -> None:
         )
 
 
-def _seed_database() -> None:
+def seed_database() -> None:
     """Populates the database with legacy, reference and generated data."""
     _seed_reference_data()
 
@@ -256,4 +256,4 @@ def _seed_database() -> None:
 
 
 if __name__ == "__main__":
-    _seed_database()
+    seed_database()
