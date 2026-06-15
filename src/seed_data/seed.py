@@ -6,6 +6,7 @@ TODO: Consider moving queries to repository layer once implemented
 from database.connection import get_connection, PROJECT_ROOT
 from legacy_csv_importer import import_legacy_csv_dataset
 from seed_data.generators.bike_generator import GeneratedBike, generate_bikes
+from seed_data.generators.trip_generator import GeneratedTrip, generate_trips
 from seed_data.generators.user_generator import generate_users, GeneratedUser
 from seed_data.generators.complaint_generator import (
     generate_complaints,
@@ -174,6 +175,26 @@ def _seed_bike_data(bikes: list[GeneratedBike]) -> None:
             ],
         )
 
+def _seed_trip_data(trips: list[GeneratedTrip]) -> None:
+    """Populates the trips table."""
+    with get_connection() as conn:
+        conn.executemany(
+            """
+            INSERT OR IGNORE INTO Trip (UserID, BikeID, StartStationID, EndStationID, StartTime, EndTime)
+            VALUES (?, ?, ?, ?, ?, ?);
+            """,
+            [
+                (
+                    trip.user_id,
+                    trip.bike_id,
+                    trip.start_station_id,
+                    trip.end_station_id,
+                    trip.start_time,
+                    trip.end_time,
+                )
+                for trip in trips
+            ],
+        )
 
 def _seed_database() -> None:
     """Populates the database with legacy, reference and generated data."""
@@ -190,6 +211,9 @@ def _seed_database() -> None:
     _seed_bike_data(bikes)
 
     bike_ids, user_ids = _load_dynamic_ids()
+    
+    trips = generate_trips(1, user_ids, bike_ids, station_ids)
+    _seed_trip_data(trips)
 
     complaints = generate_complaints(1, bike_ids, user_ids, complaint_type_ids)
     _seed_complaint_data(complaints)
