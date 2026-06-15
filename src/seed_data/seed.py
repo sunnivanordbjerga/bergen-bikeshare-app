@@ -175,6 +175,7 @@ def _seed_bike_data(bikes: list[GeneratedBike]) -> None:
             ],
         )
 
+
 def _seed_trip_data(trips: list[GeneratedTrip]) -> None:
     """Populates the trips table."""
     with get_connection() as conn:
@@ -196,6 +197,7 @@ def _seed_trip_data(trips: list[GeneratedTrip]) -> None:
             ],
         )
 
+
 def _seed_database() -> None:
     """Populates the database with legacy, reference and generated data."""
     _seed_reference_data()
@@ -211,7 +213,7 @@ def _seed_database() -> None:
     _seed_bike_data(bikes)
 
     bike_ids, user_ids = _load_dynamic_ids()
-    
+
     trips = generate_trips(1, user_ids, bike_ids, station_ids)
     _seed_trip_data(trips)
 
