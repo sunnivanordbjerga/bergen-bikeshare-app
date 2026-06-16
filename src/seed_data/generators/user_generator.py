@@ -2,7 +2,6 @@
 
 from random import uniform, random
 from dataclasses import dataclass
-
 from faker import Faker
 
 BERGEN_MIN_LAT = 60.1017

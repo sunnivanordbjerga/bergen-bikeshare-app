@@ -21,13 +21,8 @@ def test_generate_negative_bikes_raises_value_error():
         generate_bikes(-1, STATION_IDS, ACTIVITY_STATUS_IDS)
 
 
-def test_generate_bikes_uses_existing_stations():
+def test_generated_bikes_use_existing_ids():
     bikes = generate_bikes(10, STATION_IDS, ACTIVITY_STATUS_IDS)
     for bike in bikes:
         assert bike.last_station_id in STATION_IDS
-
-
-def test_generate_bikes_uses_existing_activity_statuses():
-    bikes = generate_bikes(10, STATION_IDS, ACTIVITY_STATUS_IDS)
-    for bike in bikes:
         assert bike.activity_status_id in ACTIVITY_STATUS_IDS

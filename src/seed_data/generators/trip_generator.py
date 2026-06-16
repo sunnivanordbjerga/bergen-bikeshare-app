@@ -26,6 +26,7 @@ def _generate_trip(
     user_ids: list[int],
     bike_ids: list[int],
     station_ids: list[int],
+    active_trip: bool | None = None,
 ) -> GeneratedTrip:
     """Generates a single fake trip.
     Args:
@@ -37,7 +38,8 @@ def _generate_trip(
         A generated trip.
     """
 
-    active_trip: bool = random() < ACTIVE_TRIP_PROBABILITY
+    if active_trip is None:
+        active_trip = random() < ACTIVE_TRIP_PROBABILITY
 
     trip_started = fake.date_time_between(
         start_date="-24h" if active_trip else "-6M", end_date="now"
