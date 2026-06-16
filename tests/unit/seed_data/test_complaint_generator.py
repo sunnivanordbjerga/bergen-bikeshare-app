@@ -39,6 +39,6 @@ def test_generated_complaints_use_correct_date_range():
     for complaint in complaints:
         assert (
             (now - relativedelta(months=6))
-            <= dt.datetime.strptime(complaint.report_date, "%Y-%m-%d %H:%M:%S")
+            <= dt.datetime.fromisoformat(complaint.report_date)
             <= now
         )

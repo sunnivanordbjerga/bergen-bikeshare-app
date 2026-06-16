@@ -42,7 +42,7 @@ def test_trip_start_time_uses_correct_range():
     now = dt.datetime.now()
 
     for trip in trips:
-        start_time = dt.datetime.strptime(trip.start_time, "%Y-%m-%d %H:%M:%S")
+        start_time = dt.datetime.fromisoformat(trip.start_time)
 
         assert now - relativedelta(months=6) <= start_time <= now
 
@@ -50,8 +50,8 @@ def test_trip_start_time_uses_correct_range():
 def test_completed_trip_end_time_is_after_start_time():
     trip = _generate_trip(USER_IDS, BIKE_IDS, STATION_IDS, active_trip=False)
 
-    start_time = dt.datetime.strptime(trip.start_time, "%Y-%m-%d %H:%M:%S")
-    end_time = dt.datetime.strptime(trip.end_time, "%Y-%m-%d %H:%M:%S")
+    start_time = dt.datetime.fromisoformat(trip.start_time)
+    end_time = dt.datetime.fromisoformat(trip.end_time)
 
     assert start_time < end_time
 
@@ -62,8 +62,8 @@ def test_completed_trip_duration_uses_correct_range():
         for _ in range(5)
     ]
     for trip in trips:
-        start_time = dt.datetime.strptime(trip.start_time, "%Y-%m-%d %H:%M:%S")
-        end_time = dt.datetime.strptime(trip.end_time, "%Y-%m-%d %H:%M:%S")
+        start_time = dt.datetime.fromisoformat(trip.start_time)
+        end_time = dt.datetime.fromisoformat(trip.end_time)
 
         assert 5 <= ((end_time - start_time).total_seconds()) // 60 <= 180
 

@@ -2,7 +2,7 @@
 Initializes the database schema.
 """
 
-from src.database.connection import get_connection, PROJECT_ROOT
+from database.connection import get_connection, PROJECT_ROOT
 
 SCHEMA_PATH = PROJECT_ROOT / "src" / "database" / "schema.sql"
 
