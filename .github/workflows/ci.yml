@@ -30,4 +30,9 @@ jobs:
 
       - name: Run Tests
         run: pytest --cov=src --cov-report=xml
+
+      - name: Update Coverage
+        uses: codecov/codecov-action@v5
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
   
