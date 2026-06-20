@@ -1,5 +1,5 @@
 [project]
-name = "bergen_bikeshare_app"
+name = "bergen-bikeshare-app"
 version = "0.1.0"
 dependencies = [
     "shiny == 1.6.3",

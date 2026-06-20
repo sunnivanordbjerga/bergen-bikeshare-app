@@ -1,5 +1,11 @@
 # Bergen BikeShare
 
+[![CI](https://github.com/sunnivanordbjerga/bergen-bikeshare-app/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/sunnivanordbjerga/bergen-bikeshare-app/actions/workflows/ci.yml)
+[![codecov](https://codecov.io/github/sunnivanordbjerga/bergen-bikeshare-app/branch/main/graph/badge.svg?token=MMY4R2WHRA)](https://codecov.io/github/sunnivanordbjerga/bergen-bikeshare-app)
+![Python](https://img.shields.io/badge/python-3.13-blue)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
+
 A bike-sharing management system built with Python, Shiny and SQLite.
 
 ## Overview
