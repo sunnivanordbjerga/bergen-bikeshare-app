@@ -51,7 +51,8 @@ def get_bikes(
 
 def get_bike(bike_id: int) -> Bike | None:
     with get_connection() as conn:
-        row = conn.execute("""
+        row = conn.execute(
+            """
                            SELECT B.BikeID, B.BikeName, S.StationName, AST.Description 
                            FROM Bike AS B 
                            LEFT JOIN STATION AS S 
@@ -59,7 +60,9 @@ def get_bike(bike_id: int) -> Bike | None:
                             JOIN ActivityStatus AS AST
                                ON B.ActivityStatusID = AST.ActivityStatusID \
                             WHERE B.BikeID = ?;
-                           """, (bike_id,)).fetchone()
+                           """,
+            (bike_id,),
+        ).fetchone()
 
     if row is None:
         return None
