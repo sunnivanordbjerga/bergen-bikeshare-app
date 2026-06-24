@@ -35,7 +35,7 @@ def _load_activity_statuses(conn: sqlite3.Connection) -> dict[str, int]:
     return {description: activity_id for activity_id, description in rows}
 
 
-def _load_subscription_types(conn: sqlite3.Connection) -> dict[str, SubscriptionType]:
+def _load_subscription_types() -> dict[str, SubscriptionType]:
     return {sub_type.description: sub_type for sub_type in get_subscription_types()}
 
 
