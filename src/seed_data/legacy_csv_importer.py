@@ -102,16 +102,19 @@ def _parse_subscription(
 
     sub_type = sub_types.get(sub_type_description)
 
-    if not all([sub_id, user_id]):
-        return None
-
-    if not all([sub_id, user_id, start_date_str]):
+    if sub_type is None or not all([sub_id, user_id, start_date_str]):
         return None
 
     start_date = datetime.fromisoformat(start_date_str).date()
     end_date = start_date + timedelta(days=sub_type.duration_in_days)
 
-    return sub_id, user_id, start_date, end_date, sub_type.subscription_type_id
+    return (
+        sub_id,
+        user_id,
+        str(start_date),
+        str(end_date),
+        sub_type.subscription_type_id,
+    )
 
 
 def _parse_trip(row: dict) -> tuple | None:
