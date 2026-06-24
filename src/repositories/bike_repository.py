@@ -7,6 +7,29 @@ from models.bike import Bike
 from database.connection import get_connection
 
 
+def get_bike(bike_id: int) -> Bike | None:
+    with get_connection() as conn:
+        row = conn.execute(
+            """
+                           SELECT B.BikeID, B.BikeName, S.StationName, AST.Description 
+                           FROM Bike AS B 
+                           LEFT JOIN STATION AS S 
+                               ON S.StationID = B.LastStationID
+                            JOIN ActivityStatus AS AST
+                               ON B.ActivityStatusID = AST.ActivityStatusID \
+                            WHERE B.BikeID = ?;
+                           """,
+            (bike_id,),
+        ).fetchone()
+
+    if row is None:
+        return None
+
+    return Bike(
+        bike_id=row[0], bike_name=row[1], station=row[2], activity_status=row[3]
+    )
+
+
 def get_bikes(
     station_id: int | None = None,
     status_id: int | None = None,
@@ -47,29 +70,6 @@ def get_bikes(
         Bike(bike_id=row[0], bike_name=row[1], station=row[2], activity_status=row[3])
         for row in bikes
     ]
-
-
-def get_bike(bike_id: int) -> Bike | None:
-    with get_connection() as conn:
-        row = conn.execute(
-            """
-                           SELECT B.BikeID, B.BikeName, S.StationName, AST.Description 
-                           FROM Bike AS B 
-                           LEFT JOIN STATION AS S 
-                               ON S.StationID = B.LastStationID
-                            JOIN ActivityStatus AS AST
-                               ON B.ActivityStatusID = AST.ActivityStatusID \
-                            WHERE B.BikeID = ?;
-                           """,
-            (bike_id,),
-        ).fetchone()
-
-    if row is None:
-        return None
-
-    return Bike(
-        bike_id=row[0], bike_name=row[1], station=row[2], activity_status=row[3]
-    )
 
 
 def insert_bike(name: str, station_id: int, status_id: int) -> None:

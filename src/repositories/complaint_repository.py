@@ -1,4 +1,4 @@
-"""Database access methods for complaints"""
+"""Database access methods for complaints."""
 
 from database.connection import get_connection
 from models.complaint import Complaint

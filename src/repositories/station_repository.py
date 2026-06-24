@@ -4,6 +4,37 @@ from database.connection import get_connection
 from models.station import Station
 
 
+def get_station(station_id: int) -> Station | None:
+    with get_connection() as conn:
+        row = conn.execute(
+            """
+                           SELECT S.StationID,
+                                  S.StationName,
+                                  S.Latitude,
+                                  S.Longitude,
+                                  S.MaxCapacity,
+                                  (S.MaxCapacity - COUNT(B.BikeID)) AS AvailableCapacity
+                           FROM Station AS S
+                               LEFT JOIN Bike AS B
+                           ON S.StationID = B.LastStationID
+                           WHERE S.StationID = ?
+                           """,
+            (station_id,),
+        ).fetchone()
+
+        if row is None:
+            return None
+
+        return Station(
+            station_id=row[0],
+            station_name=row[1],
+            latitude=row[2],
+            longitude=row[3],
+            max_capacity=row[4],
+            available_capacity=row[5],
+        )
+
+
 def get_stations(status_id: int | None = None) -> list[Station]:
     """
         Returns all stations, optionally filtered by activity status for bikes.
@@ -54,34 +85,3 @@ def get_stations(status_id: int | None = None) -> list[Station]:
         )
         for row in stations
     ]
-
-
-def get_station(station_id: int) -> Station | None:
-    with get_connection() as conn:
-        row = conn.execute(
-            """
-                           SELECT S.StationID,
-                                  S.StationName,
-                                  S.Latitude,
-                                  S.Longitude,
-                                  S.MaxCapacity,
-                                  (S.MaxCapacity - COUNT(B.BikeID)) AS AvailableCapacity
-                           FROM Station AS S
-                               LEFT JOIN Bike AS B
-                           ON S.StationID = B.LastStationID
-                           WHERE S.StationID = ?
-                           """,
-            (station_id,),
-        ).fetchone()
-
-        if row is None:
-            return None
-
-        return Station(
-            station_id=row[0],
-            station_name=row[1],
-            latitude=row[2],
-            longitude=row[3],
-            max_capacity=row[4],
-            available_capacity=row[5],
-        )
