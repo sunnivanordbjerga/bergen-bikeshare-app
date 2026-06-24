@@ -1,4 +1,6 @@
 import pytest
+
+from models.subscription_type import SubscriptionType
 from seed_data.legacy_csv_importer import (
     _parse_station,
     _parse_user,
@@ -14,7 +16,32 @@ ACTIVITY_STATUSES = {
     "Service": 4,
 }
 
-SUB_TYPES = {"Day": 1, "Week": 2, "Month": 3, "Year": 4}
+SUB_TYPES = {
+    "Day": SubscriptionType(
+        subscription_type_id=1,
+        description="Day",
+        duration_in_days=1,
+        price=10,
+    ),
+    "Week": SubscriptionType(
+        subscription_type_id=2,
+        description="Week",
+        duration_in_days=7,
+        price=20,
+    ),
+    "Month": SubscriptionType(
+        subscription_type_id=3,
+        description="Month",
+        duration_in_days=30,
+        price=30,
+    ),
+    "Year": SubscriptionType(
+        subscription_type_id=4,
+        description="Year",
+        duration_in_days=365,
+        price=40,
+    ),
+}
 
 
 @pytest.fixture
@@ -158,7 +185,7 @@ class TestParseSubscription:
     def test_valid_subscription_returns_correct_values(self, valid_subscription_row):
         parsed = _parse_subscription(valid_subscription_row, SUB_TYPES)
 
-        assert parsed == ("1", "1", "2020-09-18 17:22:27", 1)
+        assert parsed == ("1", "1", "2020-09-18", "2020-09-19", 1)
 
     def test_missing_subscription_id_returns_none(self, valid_subscription_row):
         valid_subscription_row["subscription_id"] = ""
