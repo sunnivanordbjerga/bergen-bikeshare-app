@@ -1,6 +1,6 @@
 """Database access methods for trips"""
 
-from datetime import datetime, date
+from datetime import datetime
 
 from database.connection import get_connection
 from models.station_traffic import StationTraffic
