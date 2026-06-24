@@ -4,6 +4,7 @@ TODO: Consider moving queries to repository layer once implemented
 """
 
 from database.connection import get_connection, PROJECT_ROOT
+from models.subscription_type import SubscriptionType
 from seed_data.legacy_csv_importer import import_legacy_csv_dataset
 from seed_data.generators.bike_generator import GeneratedBike, generate_bikes
 from seed_data.generators.subscription_generator import (
@@ -57,8 +58,10 @@ COMPLAINT_TYPES = [
 ]
 
 
-def _load_reference_ids() -> tuple[list[int], list[int], list[int], list[int]]:
-    """Loads existing station, activity status and complaint type IDs."""
+def _load_reference_data() -> tuple[
+    list[int], list[int], list[int], list[SubscriptionType]
+]:
+    """Loads existing subscription types, station-, activity status- and complaint type IDs."""
     with get_connection() as conn:
         station_ids = [
             row[0] for row in conn.execute("SELECT StationID FROM Station").fetchall()
@@ -75,14 +78,19 @@ def _load_reference_ids() -> tuple[list[int], list[int], list[int], list[int]]:
                 "SELECT ComplaintTypeID FROM ComplaintType"
             ).fetchall()
         ]
-        sub_type_ids = [
-            row[0]
+        sub_types = [
+            SubscriptionType(
+                subscription_type_id=row[0],
+                description=row[1],
+                duration_in_days=row[2],
+                price=row[3],
+            )
             for row in conn.execute(
-                "SELECT SubscriptionTypeID FROM SubscriptionType"
+                "SELECT SubscriptionTypeID, Description, DurationInDays, Price FROM SubscriptionType"
             ).fetchall()
         ]
 
-        return station_ids, activity_status_ids, complaint_type_ids, sub_type_ids
+        return station_ids, activity_status_ids, complaint_type_ids, sub_types
 
 
 def _load_dynamic_ids() -> tuple[list[int], list[int]]:
@@ -216,14 +224,15 @@ def _seed_subscription_data(subscriptions: list[GeneratedSubscription]) -> None:
     with get_connection() as conn:
         conn.executemany(
             """
-            INSERT OR IGNORE INTO Subscription (UserID, StartDate, SubscriptionTypeID)
-                VALUES (?, ?, ?);
+            INSERT OR IGNORE INTO Subscription (UserID, StartDate, EndDate, SubscriptionTypeID)
+                VALUES (?, ?, ?, ?);
             """,
             [
                 (
                     subscription.user_id,
                     subscription.start_date,
-                    subscription.sub_type_id,
+                    subscription.end_date,
+                    subscription.sub_type.subscription_type_id,
                 )
                 for subscription in subscriptions
             ],
@@ -238,8 +247,8 @@ def seed_database() -> None:
 
     _seed_additional_stations()
 
-    station_ids, activity_status_ids, complaint_type_ids, sub_type_ids = (
-        _load_reference_ids()
+    station_ids, activity_status_ids, complaint_type_ids, sub_types = (
+        _load_reference_data()
     )
 
     users = generate_users(200)
@@ -256,7 +265,7 @@ def seed_database() -> None:
     complaints = generate_complaints(100, user_ids, bike_ids, complaint_type_ids)
     _seed_complaint_data(complaints)
 
-    subscriptions = generate_subscriptions(300, user_ids, sub_type_ids)
+    subscriptions = generate_subscriptions(300, user_ids, sub_types)
     _seed_subscription_data(subscriptions)
 
 

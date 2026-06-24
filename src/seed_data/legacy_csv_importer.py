@@ -4,10 +4,15 @@ Parses and imports CSV data from bysykkel.csv into the SQLite database.
 
 import csv
 import sqlite3
+from datetime import date, timedelta, datetime
 from pathlib import Path
 from dataclasses import dataclass
 
+from pygments.util import duplicates_removed
+
 from database.connection import get_connection
+from models.subscription_type import SubscriptionType
+from repositories.subscription_repository import get_subscription_types
 
 
 @dataclass
@@ -32,15 +37,8 @@ def _load_activity_statuses(conn: sqlite3.Connection) -> dict[str, int]:
     return {description: activity_id for activity_id, description in rows}
 
 
-def _load_subscription_types(conn: sqlite3.Connection) -> dict[str, int]:
-    rows = conn.execute(
-        """
-        SELECT SubscriptionTypeID, Description
-        FROM SubscriptionType;
-        """
-    ).fetchall()
-
-    return {description: sub_id for sub_id, description in rows}
+def _load_subscription_types(conn: sqlite3.Connection) -> dict[str, SubscriptionType]:
+    return {sub_type.description: sub_type for sub_type in get_subscription_types()}
 
 
 def _parse_station(row: dict, prefix: str) -> tuple | None:
@@ -93,21 +91,29 @@ def _parse_bike(row: dict, activity_statuses: dict[str, int]) -> tuple | None:
     return bike_id, bike_name, row["bike_station_id"] or None, activity_status_id
 
 
-def _parse_subscription(row: dict, sub_types: dict[str, int]) -> tuple | None:
+def _parse_subscription(
+    row: dict, sub_types: dict[str, SubscriptionType]
+) -> tuple | None:
     sub_id = row.get("subscription_id")
     user_id = row.get("user_id")
-    start_date = row.get("subscription_start_time")
-    sub_type = row.get("subscription_type", "").strip()
+    start_date_str = row.get("subscription_start_time")
+    sub_type_description = row.get("subscription_type", "").strip()
 
-    if not sub_type:
+    if not sub_type_description:
         return None
 
-    sub_type_id = sub_types.get(sub_type)
+    sub_type = sub_types.get(sub_type_description)
 
-    if not all([sub_id, user_id, start_date]) or sub_type_id is None:
+    if not all([sub_id, user_id]):
         return None
 
-    return sub_id, user_id, start_date, sub_type_id
+    if not all([sub_id, user_id, start_date_str]):
+        return None
+
+    start_date = datetime.fromisoformat(start_date_str).date()
+    end_date = start_date + timedelta(days=sub_type.duration_in_days)
+
+    return sub_id, user_id, start_date, end_date, sub_type.subscription_type_id
 
 
 def _parse_trip(row: dict) -> tuple | None:
@@ -218,8 +224,8 @@ def _insert_data(data: ParsedData) -> None:
         cur.executemany(
             """
             INSERT OR IGNORE INTO Subscription
-                (SubscriptionID, UserID, StartDate, SubscriptionTypeID)
-            VALUES (?, ?, ?, ?);
+                (SubscriptionID, UserID, StartDate, EndDate, SubscriptionTypeID)
+            VALUES (?, ?, ?, ?, ?);
             """,
             data.subscriptions,
         )
