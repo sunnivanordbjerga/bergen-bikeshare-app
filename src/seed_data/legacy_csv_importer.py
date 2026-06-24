@@ -4,11 +4,9 @@ Parses and imports CSV data from bysykkel.csv into the SQLite database.
 
 import csv
 import sqlite3
-from datetime import date, timedelta, datetime
+from datetime import timedelta, datetime
 from pathlib import Path
 from dataclasses import dataclass
-
-from pygments.util import duplicates_removed
 
 from database.connection import get_connection
 from models.subscription_type import SubscriptionType
