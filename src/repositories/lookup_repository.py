@@ -35,7 +35,7 @@ def get_activity_status_map() -> dict[str, int]:
             description: status_id
             for status_id, description in conn.execute("""
                          SELECT ActivityStatusID, Description
-                         FROM ActivityStatus""").fetchall()
+                         FROM ActivityStatus;""").fetchall()
         }
 
 
