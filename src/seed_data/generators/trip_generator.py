@@ -70,7 +70,9 @@ def _generate_trip(
         None if active_trip else trip_started + timedelta(minutes=trip_duration)
     )
 
-    start_station = choices(station_ids, STATION_WEIGHTS, k=1)[0]
+    start_station = choices(
+        station_ids, [STATION_WEIGHTS[s] for s in station_ids], k=1
+    )[0]
 
     if active_trip:
         end_station = None
