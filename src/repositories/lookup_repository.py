@@ -32,9 +32,8 @@ def get_activity_status_map() -> dict[str, int]:
     """Returns a mapping from activity status description to activity status ID."""
     with get_connection() as conn:
         return {
-            status: status_id
-            for status_id, status in
-            conn.execute("""
+            description: status_id
+            for status_id, description in conn.execute("""
                          SELECT ActivityStatusID, Description
                          FROM ActivityStatus""").fetchall()
         }
