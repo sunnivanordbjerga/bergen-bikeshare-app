@@ -62,7 +62,9 @@ CREATE TABLE IF NOT EXISTS Subscription
 (
     SubscriptionID     INTEGER PRIMARY KEY,
     UserID             INTEGER NOT NULL,
-    StartDate          TEXT    NOT NULL, -- save as YYYY-MM-DD HH:MM:SS
+    StartDate          TEXT    NOT NULL, -- save as YYYY-MM-DD
+    EndDate            TEXT    NOT NULL  -- save as YYYY-MM-DD
+        CHECK (EndDate > StartDate),
     SubscriptionTypeID INTEGER NOT NULL,
     FOREIGN KEY (UserID)
         REFERENCES User (UserID),
