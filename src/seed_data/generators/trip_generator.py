@@ -1,13 +1,30 @@
 """Generates fake trips."""
 
 from datetime import timedelta
-from random import random, choice, randint
+from random import random, choice, randint, choices
 from dataclasses import dataclass
 from faker import Faker
 
 ACTIVE_TRIP_PROBABILITY: float = 0.005
 SAME_STATION_PROBABILITY: float = 0.02
 SHORT_TRIP_PROBABILITY: float = 0.8
+STATION_WEIGHTS = {
+    1: 9,  # Høyteknologisenteret
+    2: 10,  # Nygårdsporten
+    3: 11,  # Festplassen
+    4: 10,  # Småstrandgaten
+    5: 12,  # Torgallmenningen,
+    6: 6,  # Solheimsviken
+    7: 5,  # Damsgårdsveien
+    8: 5,  # Akvariet
+    9: 11,  # Bryggen
+    10: 11,  # Bergen Storsenter
+    11: 7,  # Grieghallen
+    12: 6,  # Fantoft
+    13: 9,  # Allegaten
+    14: 6,  # Verftet
+    15: 4,  # Lagunen
+}
 
 fake = Faker("no_NO")
 
@@ -53,14 +70,19 @@ def _generate_trip(
         None if active_trip else trip_started + timedelta(minutes=trip_duration)
     )
 
-    start_station = choice(station_ids)
+    start_station = choices(station_ids, STATION_WEIGHTS, k=1)[0]
 
     if active_trip:
         end_station = None
     elif random() < SAME_STATION_PROBABILITY:
         end_station = start_station
     else:
-        end_station = choice([s_id for s_id in station_ids if s_id != start_station])
+        possible_destinations = [
+            station for station in station_ids if station != start_station
+        ]
+        weights = [STATION_WEIGHTS[station] for station in possible_destinations]
+
+        end_station = choices(possible_destinations, weights, k=1)[0]
 
     return GeneratedTrip(
         user_id=choice(user_ids),
