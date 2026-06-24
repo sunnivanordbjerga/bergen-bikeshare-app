@@ -3,13 +3,13 @@ Parses and imports CSV data from bysykkel.csv into the SQLite database.
 """
 
 import csv
-import sqlite3
 from datetime import timedelta, datetime
 from pathlib import Path
 from dataclasses import dataclass
 
 from database.connection import get_connection
 from models.subscription_type import SubscriptionType
+from repositories.lookup_repository import get_activity_status_map
 from repositories.subscription_repository import get_subscription_types
 
 
@@ -22,21 +22,6 @@ class ParsedData:
     bikes: list[tuple]
     subscriptions: list[tuple]
     trips: list[tuple]
-
-
-def _load_activity_statuses(conn: sqlite3.Connection) -> dict[str, int]:
-    rows = conn.execute(
-        """
-        SELECT ActivityStatusID, Description
-        FROM ActivityStatus;
-        """
-    ).fetchall()
-
-    return {description: activity_id for activity_id, description in rows}
-
-
-def _load_subscription_types() -> dict[str, SubscriptionType]:
-    return {sub_type.description: sub_type for sub_type in get_subscription_types()}
 
 
 def _parse_station(row: dict, prefix: str) -> tuple | None:
@@ -78,12 +63,12 @@ def _parse_bike(row: dict, activity_statuses: dict[str, int]) -> tuple | None:
     bike_name = row.get("bike_name", "").strip()
     activity_status = row.get("bike_status", "").strip()
 
-    if not activity_status:
+    if not all([bike_id, bike_name, activity_status]):
         return None
 
     activity_status_id = activity_statuses.get(activity_status)
 
-    if not bike_id or not bike_name or activity_status_id is None:
+    if activity_status_id is None:
         return None
 
     return bike_id, bike_name, row["bike_station_id"] or None, activity_status_id
@@ -140,9 +125,11 @@ def _parse_trip(row: dict) -> tuple | None:
 
 def _extract_data(csv_path: Path) -> ParsedData:
     """Extracts normalized records from a legacy CSV dataset."""
-    with get_connection() as conn:
-        activity_statuses = _load_activity_statuses(conn)
-        subscription_types = _load_subscription_types(conn)
+
+    activity_statuses = get_activity_status_map()
+    subscription_types = {
+        sub_type.description: sub_type for sub_type in get_subscription_types()
+    }
 
     station_data: list[tuple] = []
     seen_stations: set[str] = set()
