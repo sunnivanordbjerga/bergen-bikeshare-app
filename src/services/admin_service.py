@@ -31,6 +31,6 @@ def register_bike(name: str, station_id: int) -> None:
     if not station_exists(station_id):
         raise MissingStationError(f"Station with ID {station_id} not found")
 
-    service_id = get_activity_status_id("Parked")
+    parked_id = get_activity_status_id("Parked")
 
-    insert_bike(name, station_id, service_id)
+    insert_bike(name, station_id, parked_id)
