@@ -4,8 +4,8 @@ from dataclasses import dataclass
 
 from repositories.bike_repository import get_fleet_availability
 from repositories.subscription_repository import (
-    get_total_revenue,
     get_revenue_by_month,
+    get_total_revenue,
     get_total_subscription_count,
 )
 from repositories.trip_repository import get_num_active_trips, get_trip_count_by_month

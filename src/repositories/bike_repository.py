@@ -2,9 +2,9 @@
 
 from sqlite3 import IntegrityError
 
+from database.connection import get_connection
 from exceptions import DuplicateBikeError
 from models.bike import Bike
-from database.connection import get_connection
 from repositories.lookup_repository import get_activity_status_id
 
 

@@ -4,19 +4,19 @@ import enum
 from functools import cache
 
 from exceptions import (
-    MissingBikeError,
-    MissingStationError,
     BusinessRuleError,
+    MissingBikeError,
     MissingComplaintError,
+    MissingStationError,
 )
 from models.bike import Bike
 from repositories import complaint_repository
 from repositories.bike_repository import (
     get_bike,
-    update_bike_status,
     update_bike_station,
+    update_bike_status,
 )
-from repositories.complaint_repository import has_open_complaints, get_complaint
+from repositories.complaint_repository import get_complaint, has_open_complaints
 from repositories.lookup_repository import (
     get_activity_status_map,
 )
