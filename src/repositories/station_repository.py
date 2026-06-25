@@ -8,17 +8,18 @@ def get_station(station_id: int) -> Station | None:
     with get_connection() as conn:
         row = conn.execute(
             """
-                           SELECT S.StationID,
-                                  S.StationName,
-                                  S.Latitude,
-                                  S.Longitude,
-                                  S.MaxCapacity,
-                                  (S.MaxCapacity - COUNT(B.BikeID)) AS AvailableCapacity
-                           FROM Station AS S
-                               LEFT JOIN Bike AS B
-                           ON S.StationID = B.LastStationID
-                           WHERE S.StationID = ?
-                           """,
+            SELECT S.StationID,
+                   S.StationName,
+                   S.Latitude,
+                   S.Longitude,
+                   S.MaxCapacity,
+                   (S.MaxCapacity - COUNT(B.BikeID)) AS AvailableCapacity
+            FROM Station AS S
+                     LEFT JOIN Bike AS B
+                               ON S.StationID = B.LastStationID
+            WHERE S.StationID = ?
+            GROUP BY S.StationID, S.StationName, S.Latitude, S.Longitude, S.MaxCapacity;
+            """,
             (station_id,),
         ).fetchone()
 
@@ -35,14 +36,10 @@ def get_station(station_id: int) -> Station | None:
         )
 
 
-def get_stations(status_id: int | None = None) -> list[Station]:
-    """
-        Returns all stations, optionally filtered by activity status for bikes.
-
-    Args:
-        status_id (optional): Activity status ID to filter by
-    """
-    query = """
+def get_stations() -> list[Station]:
+    """Returns all stations."""
+    with get_connection() as conn:
+        stations = conn.execute("""
             SELECT S.StationID,
                    S.StationName,
                    S.Latitude,
@@ -50,29 +47,14 @@ def get_stations(status_id: int | None = None) -> list[Station]:
                    S.MaxCapacity,
                    (S.MaxCapacity - COUNT(B.BikeID)) AS AvailableCapacity
             FROM Station AS S
-                LEFT JOIN Bike AS B
-            ON S.StationID = B.LastStationID 
-            """
-
-    params = []
-
-    if status_id is not None:
-        query += " AND B.ActivityStatusID = ?"
-        params.append(status_id)
-
-    with get_connection() as conn:
-        stations = conn.execute(
-            query
-            + """
-            GROUP BY
-            S.StationID,
-            S.StationName,
-            S.Latitude,
-            S.Longitude,
-            S.MaxCapacity;
-            """,
-            params,
-        ).fetchall()
+                     LEFT JOIN Bike AS B
+                               ON S.StationID = B.LastStationID
+            GROUP BY S.StationID,
+                     S.StationName,
+                     S.Latitude,
+                     S.Longitude,
+                     S.MaxCapacity;
+            """).fetchall()
 
     return [
         Station(
