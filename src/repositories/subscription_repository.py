@@ -10,7 +10,10 @@ def get_subscriptions() -> list[Subscription]:
         subscriptions = conn.execute("""
                                      SELECT S.SubscriptionId,
                                             (U.FirstName || ' ' || U.LastName) AS User,
+                                            ST.SubscriptionTypeID,
                                             ST.Description,
+                                            ST.DurationInDays,
+                                            ST.Price,
                                             S.StartDate,
                                             S.EndDate
                                      FROM Subscription AS S
@@ -21,9 +24,14 @@ def get_subscriptions() -> list[Subscription]:
         Subscription(
             subscription_id=row[0],
             user_name=row[1],
-            subscription_type=row[2],
-            start_date=row[3],
-            end_date=row[4],
+            subscription_type=SubscriptionType(
+                subscription_type_id=row[2],
+                description=row[3],
+                duration_in_days=row[4],
+                price=row[5],
+            ),
+            start_date=row[6],
+            end_date=row[7],
         )
         for row in subscriptions
     ]
