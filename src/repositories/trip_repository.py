@@ -12,21 +12,28 @@ def get_trips(
     start_station_id: int | None = None,
     end_station_id: int | None = None,
 ) -> list[Trip]:
-
-    query = """
-        SELECT  T.TripID,
-                U.FirstName || ' ' || U.LastName AS User,
-                B.BikeName,
-                SS.StationName AS StartStation,
-                ES.StationName AS EndStation,
-                T.StartTime,
-                T.EndTime
-        FROM Trip AS T
-            JOIN User AS U ON T.UserID = U.UserID
-            JOIN Bike AS B ON T.BikeID = B.BikeID
-            JOIN Station AS SS ON T.StartStationID = SS.StationID
-            LEFT JOIN Station AS ES ON T.EndStationID = ES.StationID
     """
+    Returns a list of trips optionally filtered by bike ID, start- and end station.
+
+    Args:
+        bike_id: Bike ID to filter by
+        start_station_id: Start station ID to filter by
+        end_station_id: End station ID to filter by
+    """
+    query = """
+            SELECT T.TripID,
+                   U.FirstName || ' ' || U.LastName AS User,
+                   B.BikeName,
+                   SS.StationName                   AS StartStation,
+                   ES.StationName                   AS EndStation,
+                   T.StartTime,
+                   T.EndTime
+            FROM Trip AS T
+                     JOIN User AS U ON T.UserID = U.UserID
+                     JOIN Bike AS B ON T.BikeID = B.BikeID
+                     JOIN Station AS SS ON T.StartStationID = SS.StationID
+                     LEFT JOIN Station AS ES ON T.EndStationID = ES.StationID \
+            """
 
     conditions = []
     params = []
@@ -62,6 +69,7 @@ def get_trips(
 
 
 def get_trip_count_by_station() -> list[StationTraffic]:
+    """Returns an overview of departures and arrivals per station."""
     with get_connection() as conn:
         traffic_overview = conn.execute("""
                                         SELECT S.StationName,
@@ -80,6 +88,7 @@ def get_trip_count_by_station() -> list[StationTraffic]:
 
 
 def get_trip_count_by_month(station_id: int | None = None) -> dict[str, int]:
+    """Returns an overview of total trips per month, optionally filtered by station."""
     query = """
         SELECT 
             strftime('%Y-%m', StartTime) as YearAndMonth,
@@ -102,3 +111,12 @@ def get_trip_count_by_month(station_id: int | None = None) -> dict[str, int]:
             trips = conn.execute(query).fetchall()
 
     return {name: count for name, count in trips}
+
+
+def get_num_active_trips() -> int:
+    with get_connection() as conn:
+        return conn.execute("""
+        SELECT COUNT(*) AS NumActiveTrips
+        FROM Trip
+            WHERE EndTime IS NULL AND EndStationID IS NULL;
+        """).fetchone()[0]
