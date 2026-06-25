@@ -9,3 +9,5 @@ class Complaint:
     complaint_id: int
     complaint_type: str
     report_date: date
+    resolved: bool
+    resolved_date: str

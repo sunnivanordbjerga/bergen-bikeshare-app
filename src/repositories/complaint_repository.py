@@ -4,7 +4,35 @@ from database.connection import get_connection
 from models.complaint import Complaint
 
 
-def get_complaints_for_bike(bike_id: int) -> list[Complaint]:
+def get_complaint(complaint_id: int) -> Complaint | None:
+    with get_connection() as conn:
+        row = conn.execute("""
+                           SELECT C.ComplaintID, CT.Description, C.ReportDate, C.Resolved, C.ResolvedDate
+                           FROM Complaint AS C
+                                    JOIN ComplaintType AS CT ON C.ComplaintTypeID = CT.ComplaintTypeID
+                           WHERE ComplaintID = ?;""").fetchone()
+        if row is None:
+            return None
+
+        return Complaint(
+            complaint_id=row[0],
+            complaint_type=row[1],
+            report_date=row[2],
+            resolved=row[3],
+            resolved_date=row[4],
+        )
+
+
+def resolve_complaint(complaint_id: int) -> None:
+    """Marks a complaint as resolved."""
+    with get_connection() as conn:
+        conn.execute(
+            "UPDATE Complaint SET Resolved = 1, ResolvedDate = DATETIME('now') WHERE ComplaintID = ?;",
+            (complaint_id,),
+        )
+
+
+def get_open_complaints_for_bike(bike_id: int) -> list[Complaint]:
     with get_connection() as conn:
         complaints = conn.execute(
             """
@@ -12,7 +40,7 @@ def get_complaints_for_bike(bike_id: int) -> list[Complaint]:
             FROM Complaint AS C
                      JOIN ComplaintType AS CT
                           ON C.ComplaintTypeID = CT.ComplaintTypeID
-            WHERE C.BikeID = ?;
+            WHERE C.BikeID = ? AND C.Resolved = 0;
             """,
             (bike_id,),
         ).fetchall()
@@ -23,15 +51,7 @@ def get_complaints_for_bike(bike_id: int) -> list[Complaint]:
     ]
 
 
-def remove_complaint(complaint_id: int) -> None:
-    with get_connection() as conn:
-        conn.execute(
-            "DELETE FROM Complaint WHERE ComplaintID = ?;",
-            (complaint_id,),
-        )
-
-
 def has_open_complaints(bike_id: int) -> bool:
     """Checks if a given bike has open complaints."""
-    result = get_complaints_for_bike(bike_id)
+    result = get_open_complaints_for_bike(bike_id)
     return bool(result)

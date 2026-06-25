@@ -22,6 +22,12 @@ class MissingStationError(RepositoryError):
     pass
 
 
+class MissingComplaintError(RepositoryError):
+    """Raised when attempting to use a complaint id not in the database"""
+
+    pass
+
+
 class BusinessRuleError(Exception):
     """Raised when a business rule fails"""
 

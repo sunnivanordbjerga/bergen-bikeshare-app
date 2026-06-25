@@ -204,8 +204,8 @@ def _seed_complaint_data(complaints: list[GeneratedComplaint]) -> None:
     with get_connection() as conn:
         conn.executemany(
             """
-            INSERT OR IGNORE INTO Complaint (BikeID, UserID, ComplaintTypeID, ReportDate)
-            VALUES (?, ?, ?, ?);
+            INSERT OR IGNORE INTO Complaint (BikeID, UserID, ComplaintTypeID, ReportDate, Resolved, ResolvedDate)
+            VALUES (?, ?, ?, ?, ?, ?);
             """,
             [
                 (
@@ -213,6 +213,8 @@ def _seed_complaint_data(complaints: list[GeneratedComplaint]) -> None:
                     complaint.user_id,
                     complaint.complaint_type_id,
                     complaint.report_date,
+                    complaint.resolved,
+                    complaint.resolved_date,
                 )
                 for complaint in complaints
             ],
@@ -262,7 +264,7 @@ def seed_database() -> None:
     trips = generate_trips(6000, user_ids, bike_ids, station_ids)
     _seed_trip_data(trips)
 
-    complaints = generate_complaints(100, user_ids, bike_ids, complaint_type_ids)
+    complaints = generate_complaints(800, user_ids, bike_ids, complaint_type_ids)
     _seed_complaint_data(complaints)
 
     subscriptions = generate_subscriptions(500, user_ids, sub_types)

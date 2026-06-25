@@ -1,13 +1,19 @@
 """Provides maintenance workflows and operational bike handling"""
 
-from exceptions import MissingBikeError, MissingStationError, BusinessRuleError
+from exceptions import (
+    MissingBikeError,
+    MissingStationError,
+    BusinessRuleError,
+    MissingComplaintError,
+)
 from models.bike import Bike
+from repositories import complaint_repository
 from repositories.bike_repository import (
     get_bike,
     update_bike_status,
     update_bike_station,
 )
-from repositories.complaint_repository import has_open_complaints
+from repositories.complaint_repository import has_open_complaints, get_complaint
 from repositories.lookup_repository import (
     get_activity_status_id,
 )
@@ -61,6 +67,19 @@ def report_missing_bike(bike_id: int) -> None:
     missing_id = get_activity_status_id(MISSING_STATUS)
 
     update_bike_status(bike_id, missing_id)
+
+
+def resolve_complaint(complaint_id: int) -> None:
+    """Resolves a selected complaint"""
+    complaint = get_complaint(complaint_id)
+
+    if complaint is None:
+        raise MissingComplaintError(f"Complaint with ID {complaint_id} does not exist.")
+
+    if complaint.resolved:
+        raise BusinessRuleError("Complaint is already resolved")
+
+    complaint_repository.resolve_complaint(complaint_id)
 
 
 def return_serviced_bike(bike_id: int, return_station_id: int) -> None:

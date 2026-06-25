@@ -1,10 +1,14 @@
 """Generates fake complaints."""
 
-from random import choice
+from datetime import timedelta
+from random import choice, random
 from dataclasses import dataclass
+
+from dateutil.relativedelta import relativedelta
 from faker import Faker
 
 fake = Faker("no_NO")
+RESOLVED_PROBABILITY = 0.8
 
 
 @dataclass
@@ -13,6 +17,8 @@ class GeneratedComplaint:
     user_id: int
     complaint_type_id: int
     report_date: str
+    resolved: bool
+    resolved_date: str | None
 
 
 def generate_complaints(
@@ -36,12 +42,35 @@ def generate_complaints(
     if num_complaints < 0:
         raise ValueError("num_complaints cannot be negative.")
 
-    return [
-        GeneratedComplaint(
-            bike_id=choice(bike_ids),
-            user_id=choice(user_ids),
-            complaint_type_id=choice(complaint_type_ids),
-            report_date=str(fake.date_time_between(start_date="-6M", end_date="now")),
+    complaints = []
+
+    for _ in range(num_complaints):
+        resolved = random() < RESOLVED_PROBABILITY
+        print(resolved)
+
+        reported = (
+            fake.date_time_between(start_date="-3y", end_date="now")
+            if resolved
+            else fake.date_time_between(start_date="-6m", end_date="now")
         )
-        for _ in range(num_complaints)
-    ]
+        resolved_date = (
+            fake.date_time_between(
+                start_date=reported + timedelta(hours=1),
+                end_date=reported + relativedelta(months=3),
+            )
+            if resolved
+            else None
+        )
+
+        complaints.append(
+            GeneratedComplaint(
+                bike_id=choice(bike_ids),
+                user_id=choice(user_ids),
+                complaint_type_id=choice(complaint_type_ids),
+                report_date=str(reported),
+                resolved=resolved,
+                resolved_date=str(resolved_date) if resolved else None,
+            )
+        )
+
+    return complaints

@@ -87,7 +87,12 @@ CREATE TABLE IF NOT EXISTS Complaint
     UserID          INTEGER NOT NULL,
     ComplaintTypeID INTEGER NOT NULL,
     ReportDate      TEXT    NOT NULL, -- save as YYYY-MM-DD HH:MM:SS
-    FOREIGN KEY (BikeID)
+    Resolved        BOOL    NOT NULL DEFAULT 0,
+    ResolvedDate    TEXT              -- save as YYYY-MM-DD HH:MM:SS
+        CHECK (ResolvedDate > ReportDate)
+        CHECK (ResolvedDate IS NULL OR RESOLVED = 1),
+    FOREIGN KEY (BikeID
+        )
         REFERENCES Bike (BikeID),
     FOREIGN KEY (UserID)
         REFERENCES User (UserID),
