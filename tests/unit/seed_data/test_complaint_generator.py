@@ -37,8 +37,23 @@ def test_generated_complaints_use_correct_date_range():
     now = dt.datetime.now()
 
     for complaint in complaints:
-        assert (
-            (now - relativedelta(months=6))
-            <= dt.datetime.fromisoformat(complaint.report_date)
-            <= now
-        )
+        if complaint.resolved:
+            assert (
+                (now - relativedelta(years=3))
+                <= dt.datetime.fromisoformat(complaint.report_date)
+                <= now
+            )
+            assert (
+                dt.datetime.fromisoformat(complaint.report_date) + dt.timedelta(hours=1)
+                <= dt.datetime.fromisoformat(complaint.resolved_date)
+                <= dt.datetime.fromisoformat(complaint.report_date)
+                + relativedelta(months=3)
+            )
+
+        else:
+            assert (
+                (now - relativedelta(months=6))
+                <= dt.datetime.fromisoformat(complaint.report_date)
+                <= now
+            )
+            assert complaint.resolved_date is None

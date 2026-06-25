@@ -46,7 +46,6 @@ def generate_complaints(
 
     for _ in range(num_complaints):
         resolved = random() < RESOLVED_PROBABILITY
-        print(resolved)
 
         reported = (
             fake.date_time_between(start_date="-3y", end_date="now")
