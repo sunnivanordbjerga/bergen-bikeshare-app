@@ -17,7 +17,7 @@ def register_bike(name: str, station_id: int) -> None:
         station_id: the ID of the bike's initial station
 
     Raises:
-        ValidationError: if the bike name is blank
+        ValidationError: if the bike name is blank or contains non-alpha characters
         DuplicateBikeError: if a bike with the given name already exists
         MissingStationError: if the station does not exist
     """
@@ -26,6 +26,9 @@ def register_bike(name: str, station_id: int) -> None:
 
     if not name:
         raise ValidationError("Bike name cannot be empty")
+
+    if not all(part.isalpha() for part in name.split()):
+        raise ValidationError("Bike name may only contain letters")
 
     if bike_exists(name):
         raise DuplicateBikeError(f"Bike '{name}' already exists")
