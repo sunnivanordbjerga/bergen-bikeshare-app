@@ -1,7 +1,9 @@
 """Provides administrative operations for managing the bike fleet."""
 
+from sqlite3 import IntegrityError
+
 from exceptions import DuplicateBikeError, MissingStationError, BusinessRuleError
-from repositories.bike_repository import bike_exists, insert_bike
+from repositories.bike_repository import insert_bike
 from repositories.lookup_repository import get_activity_status_id
 from repositories.station_repository import station_exists
 
@@ -28,12 +30,12 @@ def register_bike(name: str, station_id: int) -> None:
     if not all(part.isalpha() for part in name.split()):
         raise BusinessRuleError("Bike name may only contain letters")
 
-    if bike_exists(name):
-        raise DuplicateBikeError(f"Bike '{name}' already exists")
-
     if not station_exists(station_id):
         raise MissingStationError(f"Station with ID {station_id} not found")
 
     parked_id = get_activity_status_id("Parked")
 
-    insert_bike(name, station_id, parked_id)
+    try:
+        insert_bike(name, station_id, parked_id)
+    except IntegrityError:
+        raise DuplicateBikeError(f"Bike with name '{name}' already exists")

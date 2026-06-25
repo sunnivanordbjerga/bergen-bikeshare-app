@@ -73,16 +73,6 @@ def get_bikes(
     ]
 
 
-def bike_exists(name: str) -> bool:
-    """Returns whether a bike with the given name already exists"""
-    with get_connection() as conn:
-        result = conn.execute(
-            "SELECT BikeName FROM Bike WHERE BikeName = ?;", name
-        ).fetchone()
-
-        return bool(result)
-
-
 def insert_bike(name: str, station_id: int, status_id: int) -> None:
     """Adds a new bike to the database.
 
