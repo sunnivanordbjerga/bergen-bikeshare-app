@@ -48,10 +48,11 @@ The application does not implement authentication or role-based access control.*
 
 - [ ] The administrator can enter a bike name
 - [ ] The administrator can assign an initial station
-- [ ] Newly registered bikes are assigned the `Service` status
+- [ ] Newly registered bikes are assigned the `Parked` status
+- [ ] The newly registered bike appears in the bike overview
+- [ ] The station occupancy updates to include the new bike
 - [ ] The bike is persisted in the database
 - [ ] The system prevents duplicate bike names
-- [ ] The newly registered bike appears in the bike overview
 
 **As an administrator,**
 **I want to view and filter bikes,**
