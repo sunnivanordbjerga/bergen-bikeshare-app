@@ -1,3 +1,5 @@
+"""Provides administrative operations for managing the bike fleet."""
+
 from pydantic import ValidationError
 
 from exceptions import DuplicateBikeError, MissingStationError

@@ -44,5 +44,11 @@ def get_dashboard_data() -> DashboardData:
         trips_by_month=get_trip_count_by_month(),
     )
 
+
 result = _get_dashboard_kpis()
-print(result.active_rides, result.total_revenue, result.fleet_availability, result.subscriptions_sold)
+print(
+    result.active_rides,
+    result.total_revenue,
+    result.fleet_availability,
+    result.subscriptions_sold,
+)
