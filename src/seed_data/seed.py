@@ -24,13 +24,13 @@ ADDITIONAL_STATIONS = [
     ("Solheimsviken", 60.377240, 5.33543, 32),
     ("Damsgårdsveien", 60.381548, 5.319435, 27),
     ("Akvariet", 60.400724, 5.305309, 45),
-    ("Bryggen", 60.393147, 5.314364, 34),
-    ("Bergen Storsenter", 60.389454, 5.331953, 67),
+    ("Bryggen", 60.393147, 5.314364, 46),
+    ("Bergen Storsenter", 60.389454, 5.331953, 58),
     ("Grieghallen", 60.388990, 5.327864, 36),
-    ("Fantoft", 60.346256, 5.353832, 65),
-    ("Allegaten", 60.386476, 5.325827, 36),
-    ("Verftet", 60.395458, 5.309613, 42),
-    ("Lagunen", 60.297962, 5.327995, 62),
+    ("Fantoft", 60.346256, 5.353832, 60),
+    ("Allegaten", 60.386476, 5.325827, 24),
+    ("Verftet", 60.395458, 5.309613, 23),
+    ("Lagunen", 60.297962, 5.327995, 47),
 ]
 
 ACTIVITY_STATUSES = ["Parked", "Active", "Missing", "Service"]
@@ -254,18 +254,18 @@ def seed_database() -> None:
     users = generate_users(200)
     _seed_user_data(users)
 
-    bikes = generate_bikes(80, station_ids, activity_status_ids)
+    bikes = generate_bikes(150, station_ids, activity_status_ids)
     _seed_bike_data(bikes)
 
     bike_ids, user_ids = _load_dynamic_ids()
 
-    trips = generate_trips(4000, user_ids, bike_ids, station_ids)
+    trips = generate_trips(6000, user_ids, bike_ids, station_ids)
     _seed_trip_data(trips)
 
     complaints = generate_complaints(100, user_ids, bike_ids, complaint_type_ids)
     _seed_complaint_data(complaints)
 
-    subscriptions = generate_subscriptions(300, user_ids, sub_types)
+    subscriptions = generate_subscriptions(500, user_ids, sub_types)
     _seed_subscription_data(subscriptions)
 
 

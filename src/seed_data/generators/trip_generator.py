@@ -5,9 +5,9 @@ from random import random, choice, randint, choices
 from dataclasses import dataclass
 from faker import Faker
 
-ACTIVE_TRIP_PROBABILITY: float = 0.005
+ACTIVE_TRIP_PROBABILITY: float = 0.17
 SAME_STATION_PROBABILITY: float = 0.02
-SHORT_TRIP_PROBABILITY: float = 0.8
+SHORT_TRIP_DURATION_PROBABILITY: float = 0.8
 STATION_WEIGHTS = {
     1: 9,  # Høyteknologisenteret
     2: 10,  # Nygårdsporten
@@ -59,11 +59,13 @@ def _generate_trip(
         active_trip = random() < ACTIVE_TRIP_PROBABILITY
 
     trip_started = fake.date_time_between(
-        start_date="-24h" if active_trip else "-6M", end_date="now"
+        start_date="-24h" if active_trip else "-3y", end_date="now"
     )
 
     trip_duration = (
-        randint(5, 30) if random() < SHORT_TRIP_PROBABILITY else randint(31, 180)
+        randint(5, 30)
+        if random() < SHORT_TRIP_DURATION_PROBABILITY
+        else randint(31, 180)
     )
 
     trip_ended = (

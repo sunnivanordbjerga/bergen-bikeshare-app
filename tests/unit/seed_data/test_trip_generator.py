@@ -44,7 +44,7 @@ def test_trip_start_time_uses_correct_range():
     for trip in trips:
         start_time = dt.datetime.fromisoformat(trip.start_time)
 
-        assert now - relativedelta(months=6) <= start_time <= now
+        assert now - relativedelta(years=3) <= start_time <= now
 
 
 def test_completed_trip_end_time_is_after_start_time():
