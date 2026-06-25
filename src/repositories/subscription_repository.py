@@ -79,6 +79,14 @@ def get_subscription_count_by_type() -> dict[str, int]:
                                                     """).fetchall()
         }
 
+def get_total_subscription_count() -> int:
+    """Returns the total number of subscriptions sold over the last year."""
+    with get_connection() as conn:
+        return conn.execute("""
+                            SELECT COALESCE(COUNT(SubscriptionID), 0) AS Total
+                            FROM Subscription
+                            WHERE StartDate >= date('now', '-1 year')
+                            """).fetchone()[0]
 
 def get_total_revenue() -> int:
     """Returns the total revenue over the last year."""

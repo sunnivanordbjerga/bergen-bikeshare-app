@@ -5,6 +5,7 @@ from sqlite3 import IntegrityError
 from exceptions import DuplicateBikeError
 from models.bike import Bike
 from database.connection import get_connection
+from repositories.lookup_repository import get_activity_status_id
 
 
 def get_bike(bike_id: int) -> Bike | None:
@@ -130,3 +131,19 @@ def update_bike_station(bike_id: int, station_id: int) -> None:
                      """,
             (station_id, bike_id),
         )
+
+
+def get_fleet_availability() -> float:
+    """Returns the current percentage of available bikes"""
+    parked_status = get_activity_status_id("Parked")
+
+    with get_connection() as conn:
+        return conn.execute(
+            """
+            SELECT ROUND((SELECT COUNT(*)
+                          FROM Bike
+                          WHERE Bike.ActivityStatusID = ?) * 100.0 /
+                         (SELECT COUNT(*) FROM Bike), 1);
+            """,
+            (parked_status,),
+        ).fetchone()[0]
