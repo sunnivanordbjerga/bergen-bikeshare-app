@@ -112,4 +112,3 @@ def get_revenue_by_subscription_type() -> dict[str, int]:
                                                   ORDER BY ST.DurationInDays;
                                                   """).fetchall()
         }
-
