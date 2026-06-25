@@ -29,3 +29,8 @@ def remove_complaint(complaint_id: int) -> None:
             "DELETE FROM Complaint WHERE ComplaintID = ?;",
             (complaint_id,),
         )
+
+def has_open_complaints(bike_id: int) -> bool:
+    """Checks if a given bike has open complaints. """
+    result = get_complaints_for_bike(bike_id)
+    return bool(result)

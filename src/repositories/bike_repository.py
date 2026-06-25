@@ -80,7 +80,7 @@ def bike_exists(name: str) -> bool:
             "SELECT BikeName FROM Bike WHERE BikeName = ?;", name
         ).fetchone()
 
-        return result is not None
+        return bool(result)
 
 
 def insert_bike(name: str, station_id: int, status_id: int) -> None:

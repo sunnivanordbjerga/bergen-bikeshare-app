@@ -94,4 +94,4 @@ def station_exists(station_id: int) -> bool:
             "SELECT StationID FROM Station WHERE StationID = ?", (station_id,)
         ).fetchone()
 
-    return result is not None
+    return bool(result)
