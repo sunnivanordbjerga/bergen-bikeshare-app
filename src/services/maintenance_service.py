@@ -1,5 +1,8 @@
 """Provides maintenance workflows and operational bike handling"""
 
+import enum
+from functools import cache
+
 from exceptions import (
     MissingBikeError,
     MissingStationError,
@@ -15,13 +18,22 @@ from repositories.bike_repository import (
 )
 from repositories.complaint_repository import has_open_complaints, get_complaint
 from repositories.lookup_repository import (
-    get_activity_status_id,
+    get_activity_status_map,
 )
 from repositories.station_repository import station_exists
 
-PARKED_STATUS = "Parked"
-MISSING_STATUS = "Missing"
-SERVICE_STATUS = "Service"
+
+@cache
+def get_status_ids() -> dict[str, int]:
+    return get_activity_status_map()
+
+
+@enum.unique
+class ActivityStatus(enum.StrEnum):
+    PARKED = "Parked"
+    ACTIVE = "Active"
+    MISSING = "Missing"
+    SERVICE = "Service"
 
 
 def send_bike_to_service(bike_id: int) -> None:
@@ -37,10 +49,10 @@ def send_bike_to_service(bike_id: int) -> None:
     """
     bike = _require_bike(bike_id)
 
-    if bike.activity_status != PARKED_STATUS:
+    if bike.activity_status != ActivityStatus.PARKED:
         raise BusinessRuleError("Only parked bikes can be picked up for service")
 
-    service_id = get_activity_status_id(SERVICE_STATUS)
+    service_id = get_status_ids()[ActivityStatus.SERVICE]
 
     update_bike_status(bike_id, service_id)
 
@@ -58,13 +70,13 @@ def report_missing_bike(bike_id: int) -> None:
     """
     bike = _require_bike(bike_id)
 
-    if bike.activity_status == MISSING_STATUS:
+    if bike.activity_status == ActivityStatus.MISSING:
         raise BusinessRuleError(f"Bike {bike.bike_name} already reported missing")
 
-    if bike.activity_status == SERVICE_STATUS:
+    if bike.activity_status == ActivityStatus.SERVICE:
         raise BusinessRuleError("Bikes in service cannot be reported missing")
 
-    missing_id = get_activity_status_id(MISSING_STATUS)
+    missing_id = get_status_ids()[ActivityStatus.MISSING]
 
     update_bike_status(bike_id, missing_id)
 
@@ -102,13 +114,13 @@ def return_serviced_bike(bike_id: int, return_station_id: int) -> None:
             f"Station with id {return_station_id} does not exist."
         )
 
-    if bike.activity_status != SERVICE_STATUS:
+    if bike.activity_status != ActivityStatus.SERVICE:
         raise BusinessRuleError("Only bikes currently in service can be returned.")
 
     if has_open_complaints(bike_id):
         raise BusinessRuleError(f"Bike {bike_id} has open complaints")
 
-    parked_id = get_activity_status_id(PARKED_STATUS)
+    parked_id = get_status_ids()[ActivityStatus.PARKED]
 
     update_bike_station(bike_id, return_station_id)
     update_bike_status(bike_id, parked_id)
@@ -134,10 +146,10 @@ def recover_missing_bike(bike_id: int, return_station_id: int) -> None:
             f"Station with id {return_station_id} does not exist."
         )
 
-    if bike.activity_status != MISSING_STATUS:
+    if bike.activity_status != ActivityStatus.MISSING:
         raise BusinessRuleError("Bike is not missing.")
 
-    parked_id = get_activity_status_id(PARKED_STATUS)
+    parked_id = get_status_ids()[ActivityStatus.PARKED]
 
     update_bike_station(bike_id, return_station_id)
     update_bike_status(bike_id, parked_id)
