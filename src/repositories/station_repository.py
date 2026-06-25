@@ -85,3 +85,13 @@ def get_stations(status_id: int | None = None) -> list[Station]:
         )
         for row in stations
     ]
+
+
+def station_exists(station_id: int) -> bool:
+    """Returns whether a station with the given ID already exists"""
+    with get_connection() as conn:
+        result = conn.execute(
+            "SELECT StationID FROM Station WHERE StationID = ?", (station_id,)
+        ).fetchone()
+
+    return result is not None
