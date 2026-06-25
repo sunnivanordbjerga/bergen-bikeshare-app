@@ -1,8 +1,6 @@
 """Provides administrative operations for managing the bike fleet."""
 
-from pydantic import ValidationError
-
-from exceptions import DuplicateBikeError, MissingStationError
+from exceptions import DuplicateBikeError, MissingStationError, BusinessRuleError
 from repositories.bike_repository import bike_exists, insert_bike
 from repositories.lookup_repository import get_activity_status_id
 from repositories.station_repository import station_exists
@@ -17,7 +15,7 @@ def register_bike(name: str, station_id: int) -> None:
         station_id: the ID of the bike's initial station
 
     Raises:
-        ValidationError: if the bike name is blank or contains non-alpha characters
+        BusinessRuleError: if the bike name is blank or contains non-alpha characters
         DuplicateBikeError: if a bike with the given name already exists
         MissingStationError: if the station does not exist
     """
@@ -25,10 +23,10 @@ def register_bike(name: str, station_id: int) -> None:
     name = name.strip().capitalize()
 
     if not name:
-        raise ValidationError("Bike name cannot be empty")
+        raise BusinessRuleError("Bike name cannot be empty")
 
     if not all(part.isalpha() for part in name.split()):
-        raise ValidationError("Bike name may only contain letters")
+        raise BusinessRuleError("Bike name may only contain letters")
 
     if bike_exists(name):
         raise DuplicateBikeError(f"Bike '{name}' already exists")

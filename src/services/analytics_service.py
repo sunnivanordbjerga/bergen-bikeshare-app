@@ -3,7 +3,11 @@
 from dataclasses import dataclass
 
 from repositories.bike_repository import get_fleet_availability
-from repositories.subscription_repository import get_total_revenue, get_revenue_by_month
+from repositories.subscription_repository import (
+    get_total_revenue,
+    get_revenue_by_month,
+    get_total_subscription_count,
+)
 from repositories.trip_repository import get_num_active_trips, get_trip_count_by_month
 
 
@@ -32,7 +36,7 @@ def _get_dashboard_kpis() -> DashboardKPIs:
         fleet_availability=get_fleet_availability(),
         active_rides=get_num_active_trips(),
         total_revenue=get_total_revenue(),
-        subscriptions_sold=get_num_active_trips(),
+        subscriptions_sold=get_total_subscription_count(),
     )
 
 
@@ -43,12 +47,3 @@ def get_dashboard_data() -> DashboardData:
         revenue_by_month=get_revenue_by_month(),
         trips_by_month=get_trip_count_by_month(),
     )
-
-
-result = _get_dashboard_kpis()
-print(
-    result.active_rides,
-    result.total_revenue,
-    result.fleet_availability,
-    result.subscriptions_sold,
-)
