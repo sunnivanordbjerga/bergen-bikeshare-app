@@ -42,7 +42,7 @@ def generate_subscriptions(
     subscriptions = []
     for _ in range(num_subs):
         sub_type = choices(sub_types, SUB_TYPE_WEIGHTS, k=1)[0]
-        start = fake.date_between(start_date="-8y", end_date="now")
+        start = fake.date_between(start_date="-2y", end_date="now")
         end = start + timedelta(days=sub_type.duration_in_days)
         subscriptions.append(
             GeneratedSubscription(

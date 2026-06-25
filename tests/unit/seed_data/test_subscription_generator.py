@@ -51,7 +51,7 @@ def test_generated_subs_use_correct_start_date_range():
 
     for sub in subs:
         assert (
-            (now - relativedelta(years=8))
+            (now - relativedelta(years=2))
             <= dt.date.fromisoformat(sub.start_date)
             <= now
         )
