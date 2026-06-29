@@ -9,7 +9,7 @@ from dataclasses import dataclass
 
 from database.connection import get_connection
 from models.subscription_type import SubscriptionType
-from repositories.lookup_repository import get_activity_status_map
+from repositories.bike_repository import get_activity_status_map
 from repositories.subscription_repository import get_subscription_types
 
 

@@ -4,6 +4,31 @@ from database.connection import get_connection
 from models.complaint import Complaint
 
 
+def get_complaint_type_id(description: str) -> int:
+    """
+    Returns the complaint type ID for the given description.
+
+    Args:
+        description: complaint type description
+
+    Raises:
+         LookupError: if no matching complaint type ID exists.
+    """
+    with get_connection() as conn:
+        row = conn.execute(
+            """
+            SELECT ComplaintTypeID
+            FROM ComplaintType
+            WHERE Description = ?;
+            """,
+            (description,),
+        ).fetchone()
+
+    if row is None:
+        raise LookupError(f"Unknown complaint type: {description}")
+    return row[0]
+
+
 def get_complaint(complaint_id: int) -> Complaint | None:
     with get_connection() as conn:
         row = conn.execute("""

@@ -15,11 +15,9 @@ from repositories.bike_repository import (
     get_bike,
     update_bike_station,
     update_bike_status,
-)
-from repositories.complaint_repository import get_complaint, has_open_complaints
-from repositories.lookup_repository import (
     get_activity_status_map,
 )
+from repositories.complaint_repository import get_complaint, has_open_complaints
 from repositories.station_repository import station_exists
 
 

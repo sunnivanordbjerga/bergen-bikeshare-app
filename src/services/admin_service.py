@@ -3,8 +3,7 @@
 from sqlite3 import IntegrityError
 
 from exceptions import BusinessRuleError, DuplicateBikeError, MissingStationError
-from repositories.bike_repository import insert_bike
-from repositories.lookup_repository import get_activity_status_id
+from repositories.bike_repository import get_activity_status_id, insert_bike
 from repositories.station_repository import station_exists
 
 
