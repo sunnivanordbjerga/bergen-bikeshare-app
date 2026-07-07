@@ -1,12 +1,17 @@
 """Database access methods for stations"""
 
-from database.connection import get_connection
+import sqlite3
+
 from models.station import Station
 
 
-def get_station(station_id: int) -> Station | None:
-    with get_connection() as conn:
-        row = conn.execute(
+class StationRepository:
+    def __init__(self, conn: sqlite3.Connection) -> None:
+        self.conn = conn
+
+    def get_station(self, station_id: int) -> Station | None:
+
+        row = self.conn.execute(
             """
             SELECT S.StationID,
                    S.StationName,
@@ -35,11 +40,10 @@ def get_station(station_id: int) -> Station | None:
             available_capacity=row[5],
         )
 
+    def get_stations(self) -> list[Station]:
+        """Returns all stations."""
 
-def get_stations() -> list[Station]:
-    """Returns all stations."""
-    with get_connection() as conn:
-        stations = conn.execute("""
+        stations = self.conn.execute("""
             SELECT S.StationID,
                    S.StationName,
                    S.Latitude,
@@ -56,24 +60,23 @@ def get_stations() -> list[Station]:
                      S.MaxCapacity;
             """).fetchall()
 
-    return [
-        Station(
-            station_id=row[0],
-            station_name=row[1],
-            latitude=row[2],
-            longitude=row[3],
-            max_capacity=row[4],
-            available_capacity=row[5],
-        )
-        for row in stations
-    ]
+        return [
+            Station(
+                station_id=row[0],
+                station_name=row[1],
+                latitude=row[2],
+                longitude=row[3],
+                max_capacity=row[4],
+                available_capacity=row[5],
+            )
+            for row in stations
+        ]
 
+    def station_exists(self, station_id: int) -> bool:
+        """Returns whether a station with the given ID already exists"""
 
-def station_exists(station_id: int) -> bool:
-    """Returns whether a station with the given ID already exists"""
-    with get_connection() as conn:
-        result = conn.execute(
+        result = self.conn.execute(
             "SELECT StationID FROM Station WHERE StationID = ?", (station_id,)
         ).fetchone()
 
-    return bool(result)
+        return bool(result)

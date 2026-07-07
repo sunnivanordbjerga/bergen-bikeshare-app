@@ -1,14 +1,11 @@
 """Provides KPIs and aggregated analytics data."""
 
+import sqlite3
 from dataclasses import dataclass
 
-from repositories.bike_repository import get_fleet_availability
-from repositories.subscription_repository import (
-    get_revenue_by_month,
-    get_total_revenue,
-    get_total_subscription_count,
-)
-from repositories.trip_repository import get_num_active_trips, get_trip_count_by_month
+from repositories.bike_repository import BikeRepository
+from repositories.subscription_repository import SubscriptionRepository
+from repositories.trip_repository import TripRepository
 
 
 @dataclass
@@ -30,20 +27,26 @@ class DashboardData:
     trips_by_month: dict[str, int]
 
 
-def _get_dashboard_kpis() -> DashboardKPIs:
-    """Return the current dashboard KPIs."""
-    return DashboardKPIs(
-        fleet_availability=get_fleet_availability(),
-        active_rides=get_num_active_trips(),
-        total_revenue=get_total_revenue(),
-        subscriptions_sold=get_total_subscription_count(),
-    )
+class AnalyticsService:
+    def __init__(self, conn: sqlite3.Connection) -> None:
+        self.conn = conn
+        self.bike_repository = BikeRepository(conn)
+        self.subscription_repository = SubscriptionRepository(conn)
+        self.trip_repository = TripRepository(conn)
 
+    def _get_dashboard_kpis(self) -> DashboardKPIs:
+        """Return the current dashboard KPIs."""
+        return DashboardKPIs(
+            fleet_availability=self.bike_repository.get_fleet_availability(),
+            active_rides=self.trip_repository.get_num_active_trips(),
+            total_revenue=self.subscription_repository.get_total_revenue(),
+            subscriptions_sold=self.subscription_repository.get_total_subscription_count(),
+        )
 
-def get_dashboard_data() -> DashboardData:
-    """Return the current dashboard data."""
-    return DashboardData(
-        kpis=_get_dashboard_kpis(),
-        revenue_by_month=get_revenue_by_month(),
-        trips_by_month=get_trip_count_by_month(),
-    )
+    def get_dashboard_data(self) -> DashboardData:
+        """Return the current dashboard data."""
+        return DashboardData(
+            kpis=self._get_dashboard_kpis(),
+            revenue_by_month=self.subscription_repository.get_revenue_by_month(),
+            trips_by_month=self.trip_repository.get_trip_count_by_month(),
+        )

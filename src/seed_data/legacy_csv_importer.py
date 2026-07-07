@@ -3,15 +3,12 @@ Parses and imports CSV data from bysykkel.csv into the SQLite database.
 """
 
 import csv
+import sqlite3
 from datetime import timedelta, datetime
 from pathlib import Path
 from dataclasses import dataclass
 
-from database.connection import get_connection
 from models.subscription_type import SubscriptionType
-from repositories.bike_repository import get_activity_status_map
-from repositories.subscription_repository import get_subscription_types
-
 
 @dataclass
 class ParsedData:
@@ -125,6 +122,7 @@ def _parse_trip(row: dict) -> tuple | None:
 
 def _extract_data(csv_path: Path) -> ParsedData:
     """Extracts normalized records from a legacy CSV dataset."""
+    #TODO: Decide what to do with ref data with new connection setup
 
     activity_statuses = get_activity_status_map()
     subscription_types = {
@@ -177,63 +175,61 @@ def _extract_data(csv_path: Path) -> ParsedData:
     )
 
 
-def _insert_data(data: ParsedData) -> None:
+def _insert_data(data: ParsedData, conn: sqlite3.Connection) -> None:
     """Insert extracted data from the legacy CSV file into the database."""
-    with get_connection() as conn:
-        cur = conn.cursor()
+    conn.executemany(
+        """
+        INSERT OR IGNORE INTO Station
+            (StationID, StationName, Latitude, Longitude, MaxCapacity)
+        VALUES (?, ?, ?, ?, ?);
+        """,
+        data.stations,
+    )
 
-        cur.executemany(
-            """
-            INSERT OR IGNORE INTO Station
-                (StationID, StationName, Latitude, Longitude, MaxCapacity)
-            VALUES (?, ?, ?, ?, ?);
-            """,
-            data.stations,
-        )
+    conn.executemany(
+        """
+        INSERT OR IGNORE INTO User
+            (UserID, FirstName, LastName, PhoneNr, Latitude, Longitude)
+        VALUES (?, ?, ?, ?, ?, ?);
+        """,
+        data.users,
+    )
 
-        cur.executemany(
-            """
-            INSERT OR IGNORE INTO User
-                (UserID, FirstName, LastName, PhoneNr, Latitude, Longitude)
-            VALUES (?, ?, ?, ?, ?, ?);
-            """,
-            data.users,
-        )
+    conn.executemany(
+        """
+        INSERT OR IGNORE INTO Bike
+            (BikeID, BikeName, LastStationID, ActivityStatusID)
+        VALUES (?, ?, ?, ?);
+        """,
+        data.bikes,
+    )
 
-        cur.executemany(
-            """
-            INSERT OR IGNORE INTO Bike
-                (BikeID, BikeName, LastStationID, ActivityStatusID)
-            VALUES (?, ?, ?, ?);
-            """,
-            data.bikes,
-        )
+    conn.executemany(
+        """
+        INSERT OR IGNORE INTO Subscription
+            (SubscriptionID, UserID, StartDate, EndDate, SubscriptionTypeID)
+        VALUES (?, ?, ?, ?, ?);
+        """,
+        data.subscriptions,
+    )
 
-        cur.executemany(
-            """
-            INSERT OR IGNORE INTO Subscription
-                (SubscriptionID, UserID, StartDate, EndDate, SubscriptionTypeID)
-            VALUES (?, ?, ?, ?, ?);
-            """,
-            data.subscriptions,
-        )
-
-        cur.executemany(
-            """
-            INSERT OR IGNORE INTO Trip
-                (TripID, UserID, BikeID, StartStationID, EndStationID, StartTime, EndTime)
-            VALUES (?,?,?,?,?,?,?); 
-            """,
-            data.trips,
-        )
+    conn.executemany(
+        """
+        INSERT OR IGNORE INTO Trip
+            (TripID, UserID, BikeID, StartStationID, EndStationID, StartTime, EndTime)
+        VALUES (?,?,?,?,?,?,?); 
+        """,
+        data.trips,
+    )
 
 
-def import_legacy_csv_dataset(csv_path: Path) -> None:
+def import_legacy_csv_dataset(csv_path: Path, conn: sqlite3.Connection) -> None:
     """
     Import a legacy CSV dataset into the database.
 
     Args:
         csv_path: Path to the CSV file to import.
+        conn: The database connection to use.
     """
     data = _extract_data(csv_path)
-    _insert_data(data)
+    _insert_data(data, conn)

@@ -2,15 +2,12 @@
 Initializes the database schema.
 """
 
-from database.connection import get_connection, PROJECT_ROOT
+import sqlite3
+
+from database.connection import PROJECT_ROOT
 
 SCHEMA_PATH = PROJECT_ROOT / "src" / "database" / "schema.sql"
 
 
-def init_db() -> None:
-    with get_connection() as conn:
-        conn.executescript(SCHEMA_PATH.read_text())
-
-
-if __name__ == "__main__":
-    init_db()
+def init_db(conn: sqlite3.Connection) -> None:
+    conn.executescript(SCHEMA_PATH.read_text())
