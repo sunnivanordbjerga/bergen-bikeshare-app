@@ -6,14 +6,14 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 
-A bike-sharing management system built with Python, Shiny and SQLite.
+*A bike-sharing management system built with Python, Shiny and SQLite.*
 
 ## Overview
 
 Bergen BikeShare is an administrative dashboard for a fictional bike-sharing company operating in Bergen,
 Norway.
 
-The system supports:
+## Features
 
 * Bike fleet management
 * Trip monitoring
@@ -21,8 +21,13 @@ The system supports:
 * Maintenance operations and issue tracking
 * Subscription and revenue analytics
 
-Originally developed as a university database assignment, the project was later expanded into a portfolio application
+---
+
+## Status
+Originally developed as a university database assignment, the project is currently being expanded into a portfolio application
 featuring a more structured architecture, automated database seeding, testing and a richer administrative experience.
+
+---
 
 ## Tech Stack
 
@@ -34,12 +39,63 @@ featuring a more structured architecture, automated database seeding, testing an
 * Faker
 * Ruff
 
+---
+
+## Installation and running
+### Requirements:
+* [Python 3.13](https://www.python.org/downloads/) or newer
+* [SQLITE3](https://sqlite.org/download.html)
+
+### Clone:
+```bash
+   git clone https://github.com/sunnivanordbjerga/bergen-bikeshare-app
+   cd bergen-bikeshare-app
+```
+### Install dependencies:
+```bash
+pip install .
+```
+### Run
+```bash
+shiny run --reload --launch-browser app.py
+```
+This will open the Shiny dashboard in your browser.
+
+### Test:
+```
+pytest
+```
+
 ## Database Design
 
 <p style="text-align: center">
     <img src="docs/er_diagram.svg" width="80%" alt="ER diagram">
 </p>
 
+---
+
 ## Documentation
 - [User stories](docs/user_stories.md)
 - [Requirements](docs/requirements.md)
+
+---
+
+## Future improvements
+MVP:
+* Implement a Shiny interface
+* Complete tests for core functionality
+Stretch goals:
+* Implement an interactive station map embed
+* Show current weather on the home dashboard
+* Implement an interactive bike SVG to visualise repair status
+
+An overview of current development tasks can be found on the [issue board](https://github.com/users/sunnivanordbjerga/projects/2)
+
+---
+## Authors
+Sunniva Nord Bjerga
+
+---
+
+## License
+This project is licensed under a MIT license - see [LICENSE](LICENSE.md)
