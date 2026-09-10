@@ -56,15 +56,24 @@ featuring a more structured architecture, automated database seeding, testing an
 pip install .
 ```
 ### Run
+To create/reset and seed the database:
+
+On Windows (PowerShell):
 ```bash
-shiny run --reload --launch-browser app.py
+$env:PYTHONPATH="src"; py src/seed_data/seed.py
 ```
-This will open the Shiny dashboard in your browser.
+
+On macOS / Linux:
+```bash
+PYTHONPATH=src python3 src/seed_data/seed.py
+```
 
 ### Test:
 ```
 pytest
 ```
+
+---
 
 ## Database Design
 
@@ -84,6 +93,7 @@ pytest
 MVP:
 * Implement a Shiny interface
 * Complete tests for core functionality
+
 Stretch goals:
 * Implement an interactive station map embed
 * Show current weather on the home dashboard
@@ -92,6 +102,7 @@ Stretch goals:
 An overview of current development tasks can be found on the [issue board](https://github.com/users/sunnivanordbjerga/projects/2)
 
 ---
+
 ## Authors
 Sunniva Nord Bjerga
 
