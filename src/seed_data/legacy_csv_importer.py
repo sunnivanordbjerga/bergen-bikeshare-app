@@ -4,11 +4,14 @@ Parses and imports CSV data from bysykkel.csv into the SQLite database.
 
 import csv
 import sqlite3
-from datetime import timedelta, datetime
-from pathlib import Path
 from dataclasses import dataclass
+from datetime import datetime, timedelta
+from pathlib import Path
 
 from models.subscription_type import SubscriptionType
+from repositories.bike_repository import BikeRepository
+from repositories.subscription_repository import SubscriptionRepository
+
 
 @dataclass
 class ParsedData:
@@ -120,14 +123,12 @@ def _parse_trip(row: dict) -> tuple | None:
     )
 
 
-def _extract_data(csv_path: Path) -> ParsedData:
+def _extract_data(
+    csv_path: Path,
+    activity_statuses: dict[str, int],
+    subscription_types: dict[str, SubscriptionType],
+) -> ParsedData:
     """Extracts normalized records from a legacy CSV dataset."""
-    #TODO: Decide what to do with ref data with new connection setup
-
-    activity_statuses = get_activity_status_map()
-    subscription_types = {
-        sub_type.description: sub_type for sub_type in get_subscription_types()
-    }
 
     station_data: list[tuple] = []
     seen_stations: set[str] = set()
@@ -231,5 +232,12 @@ def import_legacy_csv_dataset(csv_path: Path, conn: sqlite3.Connection) -> None:
         csv_path: Path to the CSV file to import.
         conn: The database connection to use.
     """
-    data = _extract_data(csv_path)
+    bike_repository = BikeRepository(conn)
+    subscription_repository = SubscriptionRepository(conn)
+    activity_statuses = bike_repository.get_activity_status_map()
+    subscription_types = {
+        sub_type.description: sub_type
+        for sub_type in subscription_repository.get_subscription_types()
+    }
+    data = _extract_data(csv_path, activity_statuses, subscription_types)
     _insert_data(data, conn)
