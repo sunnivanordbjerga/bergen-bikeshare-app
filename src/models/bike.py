@@ -7,5 +7,5 @@ class Bike:
 
     bike_id: int
     bike_name: str
-    station: str | None
+    station: str
     activity_status: str

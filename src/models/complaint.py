@@ -10,4 +10,4 @@ class Complaint:
     complaint_type: str
     report_date: date
     resolved: bool
-    resolved_date: str
+    resolved_date: date | None
