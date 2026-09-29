@@ -70,46 +70,7 @@ class TripRepository:
             for row in trips
         ]
 
-    def get_trip_count_by_station(self) -> list[StationTraffic]:
-        """Returns an overview of departures and arrivals per station."""
-        traffic_overview = self.conn.execute("""
-                                        SELECT S.StationName,
-                                               COUNT(Distinct TS.TripID) AS Departures,
-                                               COUNT(DISTINCT TE.TripID) AS Arrivals
-                                        FROM Station AS S
-                                                 LEFT JOIN TRIP AS TS ON S.StationID = TS.StartStationID
-                                                 LEFT JOIN Trip AS TE ON S.StationID = TE.EndStationID
-                                        GROUP BY S.StationID, S.StationName
-                                        """).fetchall()
-
-        return [
-            StationTraffic(station_name=row[0], departures=row[1], arrivals=row[2])
-            for row in traffic_overview
-        ]
-
-    def get_trip_count_by_month(self, station_id: int | None = None) -> dict[str, int]:
-        """Returns an overview of total trips per month, optionally filtered by station."""
-        query = """
-            SELECT 
-                strftime('%Y-%m', StartTime) as YearAndMonth,
-                COUNT(*) AS TripCount
-            FROM Trip
-                WHERE StartTime >= date('now','-1 year')
-        """
-
-        if station_id is not None:
-            query += " AND (StartStationID = ? OR EndStationID = ?)"
-
-        query += " GROUP BY strftime('%Y-%m', StartTime) ORDER BY strftime('%Y-%m', StartTime);"
-
-        if station_id is not None:
-            trips = self.conn.execute(query, (station_id, station_id)).fetchall()
-        else:
-            trips = self.conn.execute(query).fetchall()
-
-        return {name: count for name, count in trips}
-
-    def get_num_active_trips(self) -> int:
+    def get_active_trips_count(self) -> int:
         return self.conn.execute("""
             SELECT COUNT(*) AS NumActiveTrips
             FROM Trip

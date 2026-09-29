@@ -2,7 +2,6 @@
 
 import enum
 import sqlite3
-from functools import cache
 
 from exceptions import (
     BusinessRuleError,
@@ -31,7 +30,6 @@ class MaintenanceService:
         self.complaint_repository = ComplaintRepository(conn)
         self.station_repository = StationRepository(conn)
 
-    @cache
     def get_status_ids(self) -> dict[str, int]:
         return self.bike_repository.get_activity_status_map()
 

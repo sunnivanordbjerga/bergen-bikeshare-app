@@ -48,7 +48,7 @@ def test_generated_subs_use_existing_types():
 
 def test_generated_subs_use_correct_start_date_range():
     subs = generate_subscriptions(10, USER_IDS, SUB_TYPES)
-    now = dt.date.today()
+    now = dt.datetime.now(tz=dt.UTC).date()
 
     for sub in subs:
         assert (

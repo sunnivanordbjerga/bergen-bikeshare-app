@@ -36,7 +36,7 @@ def test_generated_complaints_use_existing_ids():
 
 def test_generated_complaints_use_correct_date_range():
     complaints = generate_complaints(10, USER_IDS, BIKE_IDS, COMPLAINT_TYPE_IDS)
-    now = dt.datetime.now()
+    now = dt.datetime.now(tz=dt.UTC).today()
 
     for complaint in complaints:
         if complaint.resolved:

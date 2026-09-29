@@ -38,7 +38,7 @@ class AnalyticsService:
         """Return the current dashboard KPIs."""
         return DashboardKPIs(
             fleet_availability=self.get_fleet_availability(),
-            active_rides=self.trip_repository.get_num_active_trips(),
+            active_rides=self.trip_repository.get_active_trips_count(),
             total_revenue=self.subscription_repository.get_total_revenue(),
             subscriptions_sold=self.subscription_repository.get_total_subscription_count(),
         )
@@ -60,3 +60,11 @@ class AnalyticsService:
             return 0.0
 
         return round((float(total) / float(parked) * 100), 1)
+
+    def get_trip_count_by_station(self):
+        """Returns an overview of departures and arrivals per station."""
+
+
+
+    def get_trip_count_by_month(self, station_id: int | None = None) -> dict[str, int]:
+        """Returns an overview of total trips per month, optionally filtered by station."""

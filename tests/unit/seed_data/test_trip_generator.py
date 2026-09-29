@@ -41,7 +41,7 @@ def test_complete_trip_uses_existing_end_station():
 
 def test_trip_start_time_uses_correct_range():
     trips = generate_trips(10, USER_IDS, BIKE_IDS, STATION_IDS)
-    now = dt.datetime.now()
+    now = dt.datetime.now(tz=dt.UTC)
 
     for trip in trips:
         start_time = dt.datetime.fromisoformat(trip.start_time)
