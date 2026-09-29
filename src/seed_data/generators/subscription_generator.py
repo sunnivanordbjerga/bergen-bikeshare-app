@@ -1,8 +1,9 @@
 """Generates fake subscriptions."""
 
+from dataclasses import dataclass
 from datetime import timedelta
 from random import choice, choices
-from dataclasses import dataclass
+
 from faker import Faker
 
 from models.subscription_type import SubscriptionType

@@ -1,7 +1,8 @@
 """Generates fake bikes."""
 
-from random import choice, choices
 from dataclasses import dataclass
+from random import choice, choices
+
 from faker import Faker
 
 ACTIVITY_STATUS_WEIGHTS = [70, 20, 8, 2]

@@ -1,7 +1,9 @@
-import pytest
 import datetime as dt
+
+import pytest
 from dateutil.relativedelta import relativedelta
-from seed_data.generators.trip_generator import generate_trips, _generate_trip
+
+from seed_data.generators.trip_generator import _generate_trip, generate_trips
 
 USER_IDS = [1, 2, 3]
 BIKE_IDS = [4, 5, 6]

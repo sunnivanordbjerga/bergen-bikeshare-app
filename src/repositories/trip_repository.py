@@ -3,7 +3,6 @@
 import sqlite3
 from datetime import datetime
 
-from models.station_traffic import StationTraffic
 from models.trip import Trip
 
 

@@ -2,11 +2,11 @@ import pytest
 
 from models.subscription_type import SubscriptionType
 from seed_data.legacy_csv_importer import (
-    _parse_station,
-    _parse_user,
     _parse_bike,
+    _parse_station,
     _parse_subscription,
     _parse_trip,
+    _parse_user,
 )
 
 ACTIVITY_STATUSES = {

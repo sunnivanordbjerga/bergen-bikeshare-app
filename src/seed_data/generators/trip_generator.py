@@ -1,8 +1,9 @@
 """Generates fake trips."""
 
-from datetime import timedelta
-from random import random, choice, randint, choices
 from dataclasses import dataclass
+from datetime import timedelta
+from random import choice, choices, randint, random
+
 from faker import Faker
 
 ACTIVE_TRIP_PROBABILITY: float = 0.17

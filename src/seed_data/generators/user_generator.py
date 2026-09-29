@@ -1,7 +1,8 @@
 """Generates fake users."""
 
-from random import uniform, random
 from dataclasses import dataclass
+from random import random, uniform
+
 from faker import Faker
 
 BERGEN_MIN_LAT = 60.1017
