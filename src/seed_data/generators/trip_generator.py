@@ -1,7 +1,7 @@
 """Generates fake trips."""
 
 from dataclasses import dataclass
-from datetime import timedelta
+from datetime import timedelta, timezone
 from random import choice, choices, randint, random
 
 from faker import Faker
@@ -60,7 +60,7 @@ def _generate_trip(
         active_trip = random() < ACTIVE_TRIP_PROBABILITY
 
     trip_started = fake.date_time_between(
-        start_date="-24h" if active_trip else "-3y", end_date="now"
+        start_date="-24h" if active_trip else "-3y", end_date="now", tzinfo=timezone.utc
     )
 
     trip_duration = (
