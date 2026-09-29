@@ -56,9 +56,6 @@ class SubscriptionRepository:
             for row in types
         ]
 
-
-
-
     def get_subscription_count_by_month(self) -> dict[str, int]:
         """Return an overview of subscriptions sold per month over the last year."""
         return {

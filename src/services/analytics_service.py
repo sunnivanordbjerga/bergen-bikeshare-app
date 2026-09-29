@@ -64,7 +64,5 @@ class AnalyticsService:
     def get_trip_count_by_station(self):
         """Returns an overview of departures and arrivals per station."""
 
-
-
     def get_trip_count_by_month(self, station_id: int | None = None) -> dict[str, int]:
         """Returns an overview of total trips per month, optionally filtered by station."""
