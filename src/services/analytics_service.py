@@ -3,6 +3,7 @@
 import sqlite3
 from dataclasses import dataclass
 
+from repositories import bike_repository
 from repositories.bike_repository import BikeRepository
 from repositories.subscription_repository import SubscriptionRepository
 from repositories.trip_repository import TripRepository
@@ -37,7 +38,7 @@ class AnalyticsService:
     def _get_dashboard_kpis(self) -> DashboardKPIs:
         """Return the current dashboard KPIs."""
         return DashboardKPIs(
-            fleet_availability=self.bike_repository.get_fleet_availability(),
+            fleet_availability=self.get_fleet_availability(),
             active_rides=self.trip_repository.get_num_active_trips(),
             total_revenue=self.subscription_repository.get_total_revenue(),
             subscriptions_sold=self.subscription_repository.get_total_subscription_count(),
@@ -50,3 +51,13 @@ class AnalyticsService:
             revenue_by_month=self.subscription_repository.get_revenue_by_month(),
             trips_by_month=self.trip_repository.get_trip_count_by_month(),
         )
+
+    def get_fleet_availability(self) -> float:
+        """Returns the current percentage of available bikes"""
+        total = self.bike_repository.get_total_bikes_count()
+        parked = self.bike_repository.get_parked_bikes_count()
+
+        if total == 0:
+            return 0.0
+
+        return round((float(total) / float(parked) * 100),1)
