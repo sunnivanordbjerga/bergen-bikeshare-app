@@ -3,7 +3,6 @@
 import sqlite3
 from dataclasses import dataclass
 
-from repositories import bike_repository
 from repositories.bike_repository import BikeRepository
 from repositories.subscription_repository import SubscriptionRepository
 from repositories.trip_repository import TripRepository
@@ -60,4 +59,4 @@ class AnalyticsService:
         if total == 0:
             return 0.0
 
-        return round((float(total) / float(parked) * 100),1)
+        return round((float(total) / float(parked) * 100), 1)

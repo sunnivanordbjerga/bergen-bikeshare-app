@@ -163,7 +163,7 @@ class BikeRepository:
             """,
             (parked_status,),
         ).fetchone()[0]
-    
+
     def get_total_bikes_count(self) -> int:
         """Returns the total number of bikes."""
         return self.conn.execute(

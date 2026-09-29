@@ -1,11 +1,11 @@
 import pytest
 
 from seed_data.generators.user_generator import (
-    generate_users,
-    BERGEN_MIN_LAT,
     BERGEN_MAX_LAT,
-    BERGEN_MIN_LON,
     BERGEN_MAX_LON,
+    BERGEN_MIN_LAT,
+    BERGEN_MIN_LON,
+    generate_users,
 )
 
 

@@ -1,8 +1,8 @@
 """Generates fake complaints."""
 
+from dataclasses import dataclass
 from datetime import timedelta
 from random import choice, random
-from dataclasses import dataclass
 
 from dateutil.relativedelta import relativedelta
 from faker import Faker

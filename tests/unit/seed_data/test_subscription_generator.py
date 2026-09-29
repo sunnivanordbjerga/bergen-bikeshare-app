@@ -1,5 +1,6 @@
-import pytest
 import datetime as dt
+
+import pytest
 from dateutil.relativedelta import relativedelta
 
 from models.subscription_type import SubscriptionType

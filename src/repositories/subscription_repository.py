@@ -1,4 +1,5 @@
 """Database access methods for subscriptions"""
+
 import sqlite3
 
 from models.subscription import Subscription
@@ -8,7 +9,7 @@ from models.subscription_type import SubscriptionType
 class SubscriptionRepository:
     def __init__(self, conn: sqlite3.Connection) -> None:
         self.conn = conn
-        
+
     def get_subscriptions(self) -> list[Subscription]:
         subscriptions = self.conn.execute("""
                                      SELECT S.SubscriptionId,
@@ -38,14 +39,13 @@ class SubscriptionRepository:
             )
             for row in subscriptions
         ]
-    
-    
+
     def get_subscription_types(self) -> list[SubscriptionType]:
         types = self.conn.execute("""
         SELECT SubscriptionTypeId, Description, DurationInDays, Price
         FROM SubscriptionType;
         """).fetchall()
-    
+
         return [
             SubscriptionType(
                 subscription_type_id=row[0],
@@ -57,6 +57,7 @@ class SubscriptionRepository:
         ]
     
     
+
     def get_subscription_count_by_month(self) -> dict[str, int]:
         """Return an overview of subscriptions sold per month over the last year."""
         return {
@@ -69,9 +70,8 @@ class SubscriptionRepository:
                                                  GROUP BY YearAndMonth
                                                  ORDER BY YearAndMonth;
                                                  """).fetchall()
-            }
-    
-    
+        }
+
     def get_subscription_count_by_type(self) -> dict[str, int]:
         """Return an overview of subscriptions sold per subscription type over the last year."""
         return {
@@ -86,8 +86,7 @@ class SubscriptionRepository:
                                                     ORDER BY ST.DurationInDays;
                                                     """).fetchall()
         }
-    
-    
+
     def get_total_subscription_count(self) -> int:
         """Returns the total number of subscriptions sold over the last year."""
         return self.conn.execute("""
@@ -95,8 +94,7 @@ class SubscriptionRepository:
                             FROM Subscription
                             WHERE StartDate >= date('now', '-1 year')
                             """).fetchone()[0]
-    
-    
+
     def get_total_revenue(self) -> int:
         """Returns the total revenue over the last year."""
         return self.conn.execute("""
@@ -106,11 +104,10 @@ class SubscriptionRepository:
                                 S.SubscriptionTypeID = ST.SubscriptionTypeID
                             WHERE S.StartDate >= date('now', '-1 year');
                             """).fetchone()[0]
-    
-    
+
     def get_revenue_by_month(self) -> dict[str, int]:
         """Return an overview of revenue per month over the last year."""
-        
+
         return {
             month: revenue
             for month, revenue in self.conn.execute("""
@@ -123,8 +120,7 @@ class SubscriptionRepository:
                                                ORDER BY YearAndMonth;
                                                """).fetchall()
         }
-    
-    
+
     def get_revenue_by_subscription_type(self) -> dict[str, int]:
         """Return an overview of revenue per subscription type over the last year."""
         return {
