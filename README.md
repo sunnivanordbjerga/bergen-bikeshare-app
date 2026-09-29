@@ -60,12 +60,12 @@ To create/reset and seed the database:
 
 On Windows (PowerShell):
 ```bash
-$env:PYTHONPATH="src"; py src/seed_data/seed.py
+$env:PYTHONPATH="src"; py src/database/reset_db.py
 ```
 
 On macOS / Linux:
 ```bash
-PYTHONPATH=src python3 src/seed_data/seed.py
+PYTHONPATH=src python3 src/database/reset_db.py
 ```
 
 ### Test:
