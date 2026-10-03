@@ -8,10 +8,15 @@ from repositories.station_repository import StationRepository
 
 
 class AdminService:
-    def __init__(self, conn: sqlite3.Connection) -> None:
+    def __init__(
+        self,
+        conn: sqlite3.Connection,
+        bike_repository: BikeRepository,
+        station_repository: StationRepository,
+    ) -> None:
         self.conn = conn
-        self.bike_repository = BikeRepository(conn)
-        self.station_repository = StationRepository(conn)
+        self.bike_repository = bike_repository
+        self.station_repository = station_repository
 
     def register_bike(self, name: str, station_id: int) -> None:
         """

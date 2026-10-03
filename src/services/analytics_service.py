@@ -28,11 +28,17 @@ class DashboardData:
 
 
 class AnalyticsService:
-    def __init__(self, conn: sqlite3.Connection) -> None:
+    def __init__(
+        self,
+        conn: sqlite3.Connection,
+        bike_repository: BikeRepository,
+        subscription_repository: SubscriptionRepository,
+        trip_repository: TripRepository,
+    ) -> None:
         self.conn = conn
-        self.bike_repository = BikeRepository(conn)
-        self.subscription_repository = SubscriptionRepository(conn)
-        self.trip_repository = TripRepository(conn)
+        self.bike_repository = bike_repository
+        self.subscription_repository = subscription_repository
+        self.trip_repository = trip_repository
 
     def _get_dashboard_kpis(self) -> DashboardKPIs:
         """Return the current dashboard KPIs."""
@@ -59,10 +65,4 @@ class AnalyticsService:
         if total == 0:
             return 0.0
 
-        return round((float(total) / float(parked) * 100), 1)
-
-    def get_trip_count_by_station(self):
-        """Returns an overview of departures and arrivals per station."""
-
-    def get_trip_count_by_month(self, station_id: int | None = None) -> dict[str, int]:
-        """Returns an overview of total trips per month, optionally filtered by station."""
+        return round((float(parked) / float(total) * 100), 1)

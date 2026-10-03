@@ -24,11 +24,25 @@ class ActivityStatus(enum.StrEnum):
 
 
 class MaintenanceService:
-    def __init__(self, conn: sqlite3.Connection) -> None:
+    def __init__(
+        self,
+        conn: sqlite3.Connection,
+        bike_repository: BikeRepository,
+        complaint_repository: ComplaintRepository,
+        station_repository: StationRepository,
+    ) -> None:
         self.conn = conn
-        self.bike_repository = BikeRepository(conn)
-        self.complaint_repository = ComplaintRepository(conn)
-        self.station_repository = StationRepository(conn)
+        self.bike_repository = bike_repository
+        self.complaint_repository = complaint_repository
+        self.station_repository = station_repository
+
+    def _require_bike(self, bike_id: int) -> Bike:
+        bike = self.bike_repository.get_bike(bike_id)
+
+        if bike is None:
+            raise MissingBikeError(f"Bike with bike id {bike_id} does not exist.")
+
+        return bike
 
     def get_status_ids(self) -> dict[str, int]:
         return self.bike_repository.get_activity_status_map()
@@ -118,8 +132,9 @@ class MaintenanceService:
 
         parked_id = self.get_status_ids()[ActivityStatus.PARKED]
 
-        self.bike_repository.update_bike_station(bike_id, return_station_id)
-        self.bike_repository.update_bike_status(bike_id, parked_id)
+        with self.conn:
+            self.bike_repository.update_bike_station(bike_id, return_station_id)
+            self.bike_repository.update_bike_status(bike_id, parked_id)
 
     def recover_missing_bike(self, bike_id: int, return_station_id: int) -> None:
         """
@@ -146,13 +161,6 @@ class MaintenanceService:
 
         parked_id = self.get_status_ids()[ActivityStatus.PARKED]
 
-        self.bike_repository.update_bike_station(bike_id, return_station_id)
-        self.bike_repository.update_bike_status(bike_id, parked_id)
-
-    def _require_bike(self, bike_id: int) -> Bike:
-        bike = self.bike_repository.get_bike(bike_id)
-
-        if bike is None:
-            raise MissingBikeError(f"Bike with bike id {bike_id} does not exist.")
-
-        return bike
+        with self.conn:
+            self.bike_repository.update_bike_station(bike_id, return_station_id)
+            self.bike_repository.update_bike_status(bike_id, parked_id)
