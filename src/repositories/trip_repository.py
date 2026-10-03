@@ -59,20 +59,65 @@ class TripRepository:
 
         return [
             Trip(
-                trip_id=row[0],
-                user=row[1],
-                bike=row[2],
-                start_station=row[3],
-                end_station=row[4] if row[4] else None,
-                start_time=datetime.fromisoformat(row[5]),
-                end_time=datetime.fromisoformat(row[6]) if row[6] else None,
+                trip_id=row["TripID"],
+                user=row["User"],
+                bike=row["BikeName"],
+                start_station=row["StartStation"],
+                end_station=row["EndStation"] if row["EndStation"] else None,
+                start_time=datetime.fromisoformat(row["StartTime"]),
+                end_time=datetime.fromisoformat(row["EndTime"])
+                if row["EndTime"]
+                else None,
             )
             for row in trips
         ]
 
     def get_active_trips_count(self) -> int:
         return self.conn.execute("""
-            SELECT COUNT(*) AS NumActiveTrips
+            SELECT COUNT(*) AS ActiveTripsCount
             FROM Trip
                 WHERE EndTime IS NULL AND EndStationID IS NULL;
-            """).fetchone()[0]
+            """).fetchone()["ActiveTripsCount"]
+
+    def get_trip_count_by_station(self) -> list[dict]:
+        """Returns an overview of departures and arrivals per station."""
+        return [
+            dict(row)
+            for row in self.conn.execute("""
+                                 SELECT S.StationID,
+                                        S.StationName,
+                                        COALESCE(Dep.DepCount, 0)                               AS Departures,
+                                        COALESCE(Arr.ArrCount, 0)                               AS Arrivals,
+                                        (COALESCE(Arr.ArrCount, 0) - COALESCE(Dep.DepCount, 0)) AS NetFlow
+                                 FROM Station AS S
+                                          LEFT JOIN (SELECT StartStationID, COUNT(*) AS DepCount
+                                                     FROM Trip
+                                                     GROUP BY StartStationID) AS Dep
+                                                    ON S.StationID = Dep.StartStationID
+                                          LEFT JOIN (SELECT EndStationID, COUNT(*) AS ArrCount
+                                                     FROM Trip
+                                                     WHERE EndStationID IS NOT NULL
+                                                     GROUP BY EndStationID) AS Arr ON S.StationID = Arr.EndStationID
+                                 ORDER BY Departures DESC;
+                                 """).fetchall()
+        ]
+
+    def get_trip_count_by_month(
+        self, station_id: int | None = None
+    ) -> list[dict[str, int]]:
+        """Returns an overview of total trips per month for the last year, optionally filtered by station."""
+        query = """
+                SELECT strftime('%Y-%m', StartTime) AS YearAndMonth,
+                       COUNT(TripID)                AS TripCount
+                FROM Trip
+                WHERE StartTime >= date('now', '-1 year')
+                """
+        params = []
+
+        if station_id is not None:
+            query += " AND StartStationID = ? "
+            params.append(station_id)
+
+        query += " GROUP BY YearAndMonth ORDER BY YearAndMonth;"
+
+        return [dict(row) for row in self.conn.execute(query, params).fetchall()]
