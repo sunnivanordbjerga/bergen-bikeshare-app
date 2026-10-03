@@ -43,40 +43,17 @@ class BikeRepository:
                              FROM ActivityStatus;""").fetchall()
         }
 
-    def get_bike(self, bike_id: int) -> Bike | None:
-        """Returns the bike with the given bike ID."""
-        row = self.conn.execute(
-            """
-                               SELECT B.BikeID, B.BikeName, S.StationName, AST.Description 
-                               FROM Bike AS B 
-                               LEFT JOIN STATION AS S 
-                                   ON S.StationID = B.LastStationID
-                                JOIN ActivityStatus AS AST
-                                   ON B.ActivityStatusID = AST.ActivityStatusID \
-                                WHERE B.BikeID = ?;
-                               """,
-            (bike_id,),
-        ).fetchone()
-
-        if row is None:
-            return None
-
-        return Bike(
-            bike_id=row["BikeID"],
-            bike_name=row["BikeName"],
-            station=row["StationName"],
-            activity_status=row["Description"],
-        )
-
     def get_bikes(
         self,
+        bike_id: int | None = None,
         station_id: int | None = None,
         status_id: int | None = None,
     ) -> list[Bike]:
         """
-        Returns all bikes, optionally filtered by station and/or activity status.
+        Returns a list of bikes, optionally filtered by station, bike_id and/or activity status.
 
         Args:
+            bike_id: (optional) bike ID to filter by.
             station_id: (optional) station ID to filter by.
             status_id: (optional) activity status ID to filter by.
         """
@@ -90,6 +67,10 @@ class BikeRepository:
                     """
         conditions = []
         params = []
+
+        if bike_id is not None:
+            conditions.append("B.BikeID = ?")
+            params.append(bike_id)
 
         if station_id is not None:
             conditions.append("B.LastStationID = ?")
