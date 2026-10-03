@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from datetime import date
+from datetime import datetime
 
 from models.subscription_type import SubscriptionType
 
@@ -11,5 +11,5 @@ class Subscription:
     subscription_id: int
     user_name: str
     subscription_type: SubscriptionType
-    start_date: date
-    end_date: date
+    start_date: datetime
+    end_date: datetime
