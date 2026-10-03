@@ -9,74 +9,52 @@ class StationRepository:
     def __init__(self, conn: sqlite3.Connection) -> None:
         self.conn = conn
 
-    def get_station(self, station_id: int) -> Station | None:
+    def get_stations(self, station_id: int | None = None) -> list[Station]:
+        """
+        Returns a list of stations, optionally filtered by a given Station ID.
+        Args:
+            station_id(int): Station ID to filter by. If None, all stations are returned.
+        """
+        query = """
+                SELECT S.StationID,
+                       S.StationName,
+                       S.Latitude,
+                       S.Longitude,
+                       S.MaxCapacity,
+                       (S.MaxCapacity - COUNT(CASE WHEN AST.Description = 'Parked' THEN 1 END)) AS AvailableCapacity
+                FROM Station AS S
+                         LEFT JOIN Bike AS B
+                                   ON S.StationID = B.LastStationID
+                         LEFT JOIN ActivityStatus AS AST
+                                   ON AST.ActivityStatusID = B.ActivityStatusID \
+                """
+        params = []
 
-        row = self.conn.execute(
-            """
-            SELECT S.StationID,
-                   S.StationName,
-                   S.Latitude,
-                   S.Longitude,
-                   S.MaxCapacity,
-                   (S.MaxCapacity - COUNT(B.BikeID)) AS AvailableCapacity
-            FROM Station AS S
-                     LEFT JOIN Bike AS B
-                               ON S.StationID = B.LastStationID
-            WHERE S.StationID = ?
-            GROUP BY S.StationID, S.StationName, S.Latitude, S.Longitude, S.MaxCapacity;
-            """,
-            (station_id,),
-        ).fetchone()
+        if station_id is not None:
+            query += " WHERE S.StationID = ?"
+            params.append(station_id)
 
-        if row is None:
-            return None
+        query += "GROUP BY S.StationID, S.StationName, S.Latitude, S.Longitude, S.MaxCapacity;"
 
-        return Station(
-            station_id=row[0],
-            station_name=row[1],
-            latitude=row[2],
-            longitude=row[3],
-            max_capacity=row[4],
-            available_capacity=row[5],
-        )
-
-    def get_stations(self) -> list[Station]:
-        """Returns all stations."""
-
-        stations = self.conn.execute("""
-            SELECT S.StationID,
-                   S.StationName,
-                   S.Latitude,
-                   S.Longitude,
-                   S.MaxCapacity,
-                   (S.MaxCapacity - COUNT(B.BikeID)) AS AvailableCapacity
-            FROM Station AS S
-                     LEFT JOIN Bike AS B
-                               ON S.StationID = B.LastStationID
-            GROUP BY S.StationID,
-                     S.StationName,
-                     S.Latitude,
-                     S.Longitude,
-                     S.MaxCapacity;
-            """).fetchall()
+        rows = self.conn.execute(query, params).fetchall()
 
         return [
             Station(
-                station_id=row[0],
-                station_name=row[1],
-                latitude=row[2],
-                longitude=row[3],
-                max_capacity=row[4],
-                available_capacity=row[5],
+                station_id=row["StationID"],
+                station_name=row["StationName"],
+                latitude=row["Latitude"],
+                longitude=row["Longitude"],
+                max_capacity=row["MaxCapacity"],
+                available_capacity=row["AvailableCapacity"],
             )
-            for row in stations
+            for row in rows
         ]
 
     def station_exists(self, station_id: int) -> bool:
         """Returns whether a station with the given ID already exists"""
 
         result = self.conn.execute(
-            "SELECT StationID FROM Station WHERE StationID = ?", (station_id,)
+            "SELECT EXISTS (SELECT 1 FROM Station WHERE StationID = ?)", (station_id,)
         ).fetchone()
 
-        return bool(result)
+        return bool(result[0])
