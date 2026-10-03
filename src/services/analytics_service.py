@@ -4,6 +4,7 @@ import sqlite3
 from dataclasses import dataclass
 
 from repositories.bike_repository import BikeRepository
+from repositories.revenue_repository import RevenueRepository
 from repositories.subscription_repository import SubscriptionRepository
 from repositories.trip_repository import TripRepository
 
@@ -23,8 +24,8 @@ class DashboardData:
     """Aggregated data displayed on the dashboard"""
 
     kpis: DashboardKPIs
-    revenue_by_month: dict[str, int]
-    trips_by_month: dict[str, int]
+    revenue_by_month: list[dict[str, int]]
+    trips_by_month: list[dict[str, int]]
 
 
 class AnalyticsService:
@@ -33,11 +34,13 @@ class AnalyticsService:
         conn: sqlite3.Connection,
         bike_repository: BikeRepository,
         subscription_repository: SubscriptionRepository,
+        revenue_repository: RevenueRepository,
         trip_repository: TripRepository,
     ) -> None:
         self.conn = conn
         self.bike_repository = bike_repository
         self.subscription_repository = subscription_repository
+        self.revenue_repository = revenue_repository
         self.trip_repository = trip_repository
 
     def _get_dashboard_kpis(self) -> DashboardKPIs:
@@ -53,7 +56,7 @@ class AnalyticsService:
         """Return the current dashboard data."""
         return DashboardData(
             kpis=self._get_dashboard_kpis(),
-            revenue_by_month=self.subscription_repository.get_revenue_by_month(),
+            revenue_by_month=self.revenue_repository.get_revenue_by_month(),
             trips_by_month=self.trip_repository.get_trip_count_by_month(),
         )
 

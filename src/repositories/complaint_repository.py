@@ -96,7 +96,7 @@ class ComplaintRepository:
         """Checks if a given bike has open complaints."""
         row = self.conn.execute(
             """
-        SELECT EXISTS (SELECT 1 FROM Complaint AS C WHERE BikeID = ? AND Resolved = 0);""",
+        SELECT EXISTS (SELECT 1 FROM Complaint AS C WHERE BikeID = ? AND Resolved = 0) AS HasOpenComplaints;""",
             (bike_id,),
         ).fetchone()
-        return bool(row[0])
+        return bool(row["HasOpenComplaints"]) if row else False
