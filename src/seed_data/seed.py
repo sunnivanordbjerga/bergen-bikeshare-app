@@ -65,24 +65,25 @@ def _load_reference_data(
     """Loads existing subscription types, station-, activity status- and complaint type IDs."""
 
     station_ids = [
-        row[0] for row in conn.execute("SELECT StationID FROM Station").fetchall()
+        row["StationID"]
+        for row in conn.execute("SELECT StationID FROM Station").fetchall()
     ]
     activity_status_ids = [
-        row[0]
+        row["ActivityStatusID"]
         for row in conn.execute(
             "SELECT ActivityStatusID FROM ActivityStatus"
         ).fetchall()
     ]
     complaint_type_ids = [
-        row[0]
+        row["ComplaintTypeID"]
         for row in conn.execute("SELECT ComplaintTypeID FROM ComplaintType").fetchall()
     ]
     sub_types = [
         SubscriptionType(
-            subscription_type_id=row[0],
-            description=row[1],
-            duration_in_days=row[2],
-            price=row[3],
+            subscription_type_id=row["SubscriptionTypeID"],
+            description=row["Description"],
+            duration_in_days=row["DurationInDays"],
+            price=row["Price"],
         )
         for row in conn.execute(
             "SELECT SubscriptionTypeID, Description, DurationInDays, Price FROM SubscriptionType"
@@ -94,8 +95,12 @@ def _load_reference_data(
 
 def _load_dynamic_ids(conn: sqlite3.Connection) -> tuple[list[int], list[int]]:
     """Loads existing bike and user IDs."""
-    bike_ids = [row[0] for row in conn.execute("SELECT BikeID FROM Bike").fetchall()]
-    user_ids = [row[0] for row in conn.execute("SELECT UserID FROM User").fetchall()]
+    bike_ids = [
+        row["BikeID"] for row in conn.execute("SELECT BikeID FROM Bike").fetchall()
+    ]
+    user_ids = [
+        row["UserID"] for row in conn.execute("SELECT UserID FROM User").fetchall()
+    ]
 
     return bike_ids, user_ids
 
@@ -124,6 +129,7 @@ def _seed_lookup_data(conn: sqlite3.Connection) -> None:
 
 
 def _seed_additional_stations(conn: sqlite3.Connection):
+    """Populates the station table with non-csv stations."""
     conn.executemany(
         "INSERT OR IGNORE INTO Station(StationName, Latitude, Longitude, MaxCapacity) VALUES (?,?,?,?);",
         ADDITIONAL_STATIONS,

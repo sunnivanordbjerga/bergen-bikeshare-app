@@ -32,18 +32,19 @@ class BikeRepository:
 
         if row is None:
             raise LookupError(f"Unknown activity status: {description}")
-        return row[0]
+        return row["ActivityStatusID"]
 
     def get_activity_status_map(self) -> dict[str, int]:
         """Returns a mapping from activity status description to activity status ID."""
         return {
-            description: status_id
-            for status_id, description in self.conn.execute("""
+            row["Description"]: row["ActivityStatusID"]
+            for row in self.conn.execute("""
                              SELECT ActivityStatusID, Description
                              FROM ActivityStatus;""").fetchall()
         }
 
     def get_bike(self, bike_id: int) -> Bike | None:
+        """Returns the bike with the given bike ID."""
         row = self.conn.execute(
             """
                                SELECT B.BikeID, B.BikeName, S.StationName, AST.Description 
@@ -61,7 +62,10 @@ class BikeRepository:
             return None
 
         return Bike(
-            bike_id=row[0], bike_name=row[1], station=row[2], activity_status=row[3]
+            bike_id=row["BikeID"],
+            bike_name=row["BikeName"],
+            station=row["StationName"],
+            activity_status=row["Description"],
         )
 
     def get_bikes(
@@ -102,7 +106,10 @@ class BikeRepository:
 
         return [
             Bike(
-                bike_id=row[0], bike_name=row[1], station=row[2], activity_status=row[3]
+                bike_id=row["BikeID"],
+                bike_name=row["BikeName"],
+                station=row["StationName"],
+                activity_status=row["Description"],
             )
             for row in bikes
         ]
@@ -132,6 +139,7 @@ class BikeRepository:
             raise
 
     def update_bike_status(self, bike_id: int, status_id: int) -> None:
+        """Sets the activity status of the given bike to the given status."""
         self.conn.execute(
             """
                          UPDATE Bike
@@ -142,6 +150,7 @@ class BikeRepository:
         )
 
     def update_bike_station(self, bike_id: int, station_id: int) -> None:
+        """Sets the station of the given bike to the given station."""
         self.conn.execute(
             """
                          UPDATE Bike
@@ -157,18 +166,18 @@ class BikeRepository:
 
         return self.conn.execute(
             """
-            SELECT COUNT(*)
+            SELECT COUNT(*) AS ParkedBikesCount
             FROM Bike 
                 WHERE Bike.ActivityStatusID = ?;
             """,
             (parked_status,),
-        ).fetchone()[0]
+        ).fetchone()["ParkedBikesCount"]
 
     def get_total_bikes_count(self) -> int:
         """Returns the total number of bikes."""
         return self.conn.execute(
             """
-            SELECT COUNT(*)
+            SELECT COUNT(*) AS BikesCount
             FROM Bike;
             """
-        ).fetchone()[0]
+        ).fetchone()["BikesCount"]

@@ -1,6 +1,7 @@
 """Database access methods for complaints."""
 
 import sqlite3
+from datetime import datetime as dt
 
 from models.complaint import Complaint
 
@@ -30,24 +31,32 @@ class ComplaintRepository:
 
         if row is None:
             raise LookupError(f"Unknown complaint type: {description}")
-        return row[0]
+        return row["ComplaintTypeID"]
 
     def get_complaint(self, complaint_id: int) -> Complaint | None:
+        """Returns the complaint with the given ID."""
 
-        row = self.conn.execute("""
+        row = self.conn.execute(
+            """
                            SELECT C.ComplaintID, CT.Description, C.ReportDate, C.Resolved, C.ResolvedDate
                            FROM Complaint AS C
                                     JOIN ComplaintType AS CT ON C.ComplaintTypeID = CT.ComplaintTypeID
-                           WHERE ComplaintID = ?;""").fetchone()
+                           WHERE ComplaintID = ?;""",
+            (complaint_id,),
+        ).fetchone()
         if row is None:
             return None
 
+        resolved_date_val = row["ResolvedDate"]
+
         return Complaint(
-            complaint_id=row[0],
-            complaint_type=row[1],
-            report_date=row[2],
-            resolved=row[3],
-            resolved_date=row[4],
+            complaint_id=row["ComplaintID"],
+            complaint_type=row["Description"],
+            report_date=dt.fromisoformat(row["ReportDate"]),
+            resolved=bool(row["Resolved"]),
+            resolved_date=dt.fromisoformat(row["ResolvedDate"])
+            if resolved_date_val
+            else None,
         )
 
     def resolve_complaint(self, complaint_id: int) -> None:
@@ -59,6 +68,7 @@ class ComplaintRepository:
         )
 
     def get_open_complaints_for_bike(self, bike_id: int) -> list[Complaint]:
+        """Returns a list of open complaints for a given bike."""
 
         complaints = self.conn.execute(
             """
@@ -72,11 +82,21 @@ class ComplaintRepository:
         ).fetchall()
 
         return [
-            Complaint(complaint_id=row[0], complaint_type=row[1], report_date=row[2])
+            Complaint(
+                complaint_id=row["ComplaintID"],
+                complaint_type=row["Description"],
+                report_date=dt.fromisoformat(row["ReportDate"]),
+                resolved=False,
+                resolved_date=None,
+            )
             for row in complaints
         ]
 
     def has_open_complaints(self, bike_id: int) -> bool:
         """Checks if a given bike has open complaints."""
-        result = self.get_open_complaints_for_bike(bike_id)
-        return bool(result)
+        row = self.conn.execute(
+            """
+        SELECT EXISTS (SELECT 1 FROM Complaint AS C WHERE BikeID = ? AND Resolved = 0);""",
+            (bike_id,),
+        ).fetchone()
+        return bool(row[0])
