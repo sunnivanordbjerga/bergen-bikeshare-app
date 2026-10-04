@@ -1,6 +1,5 @@
 import pytest
 
-from models.subscription_type import SubscriptionType
 from database.seed_data.legacy_csv_importer import (
     _parse_bike,
     _parse_station,
@@ -8,6 +7,7 @@ from database.seed_data.legacy_csv_importer import (
     _parse_trip,
     _parse_user,
 )
+from models.subscription_type import SubscriptionType
 
 ACTIVITY_STATUSES = {
     "Parked": 1,
