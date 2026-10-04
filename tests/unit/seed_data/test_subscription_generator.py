@@ -3,8 +3,8 @@ import datetime as dt
 import pytest
 from dateutil.relativedelta import relativedelta
 
-from models.subscription_type import SubscriptionType
 from database.seed_data.generators.subscription_generator import generate_subscriptions
+from models.subscription_type import SubscriptionType
 
 USER_IDS = [1, 2, 3]
 SUB_TYPES = [
