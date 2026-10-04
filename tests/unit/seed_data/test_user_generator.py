@@ -1,6 +1,6 @@
 import pytest
 
-from seed_data.generators.user_generator import (
+from database.seed_data.generators.user_generator import (
     BERGEN_MAX_LAT,
     BERGEN_MAX_LON,
     BERGEN_MIN_LAT,

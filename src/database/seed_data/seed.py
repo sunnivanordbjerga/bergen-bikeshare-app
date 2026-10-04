@@ -6,18 +6,18 @@ import sqlite3
 
 from database.connection import PROJECT_ROOT
 from models.subscription_type import SubscriptionType
-from seed_data.generators.bike_generator import GeneratedBike, generate_bikes
-from seed_data.generators.complaint_generator import (
+from database.seed_data.generators.bike_generator import GeneratedBike, generate_bikes
+from database.seed_data.generators.complaint_generator import (
     GeneratedComplaint,
     generate_complaints,
 )
-from seed_data.generators.subscription_generator import (
+from database.seed_data.generators.subscription_generator import (
     GeneratedSubscription,
     generate_subscriptions,
 )
-from seed_data.generators.trip_generator import GeneratedTrip, generate_trips
-from seed_data.generators.user_generator import GeneratedUser, generate_users
-from seed_data.legacy_csv_importer import import_legacy_csv_dataset
+from database.seed_data.generators.trip_generator import GeneratedTrip, generate_trips
+from database.seed_data.generators.user_generator import GeneratedUser, generate_users
+from database.seed_data.legacy_csv_importer import import_legacy_csv_dataset
 
 CSV_PATH = PROJECT_ROOT / "data" / "bysykkel.csv"
 

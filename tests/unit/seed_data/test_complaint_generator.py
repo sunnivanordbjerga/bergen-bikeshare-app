@@ -3,7 +3,7 @@ import datetime as dt
 import pytest
 from dateutil.relativedelta import relativedelta
 
-from seed_data.generators.complaint_generator import generate_complaints
+from database.seed_data.generators.complaint_generator import generate_complaints
 
 USER_IDS = [1, 2, 3]
 BIKE_IDS = [4, 5, 6]

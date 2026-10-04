@@ -1,7 +1,7 @@
 import pytest
 
 from models.subscription_type import SubscriptionType
-from seed_data.legacy_csv_importer import (
+from database.seed_data.legacy_csv_importer import (
     _parse_bike,
     _parse_station,
     _parse_subscription,

@@ -6,7 +6,7 @@ WARNING: Deletes the existing database file if it exists.
 
 from database.connection import DB_PATH, get_connection
 from database.init_db import init_db
-from seed_data.seed import seed_database
+from database.seed_data.seed import seed_database
 
 
 def reset_db() -> None:

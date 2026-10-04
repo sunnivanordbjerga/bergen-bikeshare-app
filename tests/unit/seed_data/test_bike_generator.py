@@ -1,6 +1,6 @@
 import pytest
 
-from seed_data.generators.bike_generator import generate_bikes
+from database.seed_data.generators.bike_generator import generate_bikes
 
 STATION_IDS = [1, 2, 3, 4]
 ACTIVITY_STATUS_IDS = [5, 6, 7, 8]
